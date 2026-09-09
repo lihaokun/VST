@@ -6,7 +6,12 @@ test "$(pwd -P)" = "$root" || { printf '%s\n' 'Run from the VST checkout root.' 
 for var in COQLIB ROCQLIB ROCQCORELIB COQPATH ROCQPATH; do
   test -z "${!var:-}" || { printf 'Unexpected library override: %s\n' "$var" >&2; exit 2; }
 done
-prefix=$(opam var prefix)
+# opam exec sets OPAM_SWITCH_PREFIX but does not necessarily set OPAMSWITCH;
+# an unqualified nested `opam var prefix` can then report the global default.
+prefix=${OPAM_SWITCH_PREFIX:?Run this check through opam exec --switch=...}
+test "$(dirname "$(command -v coqc)")" = "$prefix/bin" || {
+  printf '%s\n' 'Compiler PATH does not match OPAM_SWITCH_PREFIX.' >&2; exit 2;
+}
 python3 util/fusion_manifest.py verify "$prefix/lib/coq/user-contrib/VST"
 mkdir -p fusion/.build/tests
 cp fusion/tests/*.v fusion/.build/tests/
