@@ -1,48 +1,68 @@
 opam-version: "2.0"
-synopsis: "Verified Software Toolchain"
-description: "The software toolchain includes static analyzers to check assertions about your program; optimizing compilers to translate your program to machine language; operating systems and libraries to supply context for your program. The Verified Software Toolchain project assures with machine-checked proofs that the assertions claimed at the top of the toolchain really hold in the machine-language program, running in the operating-system context."
-authors: [
-  "Andrew W. Appel"
-  "Lennart Beringer"
-  "Josiah Dodds"
-  "Qinxiang Cao"
-  "Aquinas Hobor"
-  "Gordon Stewart"
-  "Qinshi Wang"
-  "Sandrine Blazy"
-  "Santiago Cuellar"
-  "Robert Dockins"
-  "Nick Giannarakis"
-  "Samuel Gruetter"
-  "Jean-Marie Madiot"
-]
-maintainer: "VST team"
-homepage: "http://vst.cs.princeton.edu/"
-dev-repo: "git+https://github.com/PrincetonUniversity/VST.git"
-bug-reports: "https://github.com/PrincetonUniversity/VST/issues"
+name: "coq-vst"
+version: "2.16+ccv-fusion.1"
+synopsis: "VST 2.16 with the committed CCV fusion store rule"
+maintainer: "CCV toolchain maintainers"
+authors: ["VST team" "CCV fusion contributors"]
 license: "BSD-2-Clause"
-
+homepage: "https://github.com/Lin23299/VST"
+bug-reports: "https://github.com/Lin23299/VST/issues"
+dev-repo: "git+https://github.com/Lin23299/VST.git"
+depends: [
+  "ocaml" {= "4.14.2"}
+  "ocaml-base-compiler" {= "4.14.2"}
+  "coq" {= "9.0.0"}
+  "coq-core" {= "9.0.0"}
+  "coq-stdlib" {= "9.0.0"}
+  "coqide-server" {= "9.0.0"}
+  "rocq-core" {= "9.0.0"}
+  "rocq-runtime" {= "9.0.0"}
+  "rocq-stdlib" {= "9.0.0"}
+  "coq-compcert" {= "3.17"}
+  "coq-flocq" {= "4.2.2"}
+  "coq-vst-zlist" {= "2.13"}
+  "coq-menhirlib" {= "20260209"}
+  "menhir" {= "20260209"}
+  "menhirCST" {= "20260209"}
+  "menhirGLR" {= "20260209"}
+  "menhirLib" {= "20260209"}
+  "menhirSdk" {= "20260209"}
+  "dune" {= "3.23.1"}
+  "dune-configurator" {= "3.23.1"}
+  "ocamlfind" {= "1.9.8"}
+  "zarith" {= "1.14"}
+  "num" {= "1.6"}
+  "ocamlbuild" {= "0.16.1"}
+  "base" {= "v0.16.5"}
+  "conf-clang" {= "2"}
+  "conf-gmp" {= "5"}
+  "conf-linux-libc-dev" {= "0"}
+  "conf-pkg-config" {= "5"}
+  "cppo" {= "1.8.0"}
+  "csexp" {= "1.5.2"}
+  "jsonrpc" {= "1.27.0"}
+  "lsp" {= "1.27.0"}
+  "ocaml-compiler-libs" {= "v0.12.4"}
+  "ocaml-config" {= "2"}
+  "octavius" {= "1.2.2"}
+  "ppx_derivers" {= "1.2.1"}
+  "ppx_deriving" {= "6.0.3"}
+  "ppx_optcomp" {= "v0.16.0"}
+  "ppx_yojson_conv_lib" {= "v0.16.0"}
+  "ppxlib" {= "0.35.0"}
+  "result" {= "1.5"}
+  "sexplib0" {= "v0.16.0"}
+  "stdio" {= "v0.16.0"}
+  "stdlib-shims" {= "0.3.0"}
+  "topkg" {= "1.1.1"}
+  "uutf" {= "1.0.4"}
+  "yojson" {= "3.0.0"}
+]
 build: [
-  [make "-j%{jobs}%" "vst" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64"]
+  ["python3" "util/fusion_manifest.py" "check-source" "." "%{lib}%/coq/user-contrib/VST"]
+  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "IGNORECOMPCERTVERSION=true" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64" "ARCH=x86"]
 ]
 install: [
-  [make "install" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64"]
-]
-run-test: [
-  [make "-j%{jobs}%" "test" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64"]
-]
-depends: [
-  "ocaml"
-  "coq" {>= "8.19" & < "9.1~"}
-  "coq-core" { >= "9.0" }
-  "coq-stdlib" { >= "9.0" }
-  "coq-compcert" {>= "3.15" & < "3.17~"}
-  "coq-vst-zlist" {= "2.13"}
-  "coq-flocq" {>= "4.2.0" & < "5~"}
-]
-tags: [
-  "category:Computer Science/Semantics and Compilation/Semantics"
-  "keyword:C"
-  "logpath:VST"
-  "date:2025-11-13"
+  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "IGNORECOMPCERTVERSION=true" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64" "ARCH=x86"]
+  ["python3" "util/fusion_manifest.py" "install" "%{lib}%/coq/user-contrib/VST"]
 ]

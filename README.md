@@ -1,5 +1,9 @@
 ![Verified Software Toolchain](chain.jpg)
 
+**Fusion branch:** optional exact-store support in the same sealed Floyd logic.
+See [fusion/README.md](fusion/README.md) for the fixed release, isolated opam
+installation, public API and kernel-checked regression procedure.
+
 with contributions from
 
 [Andrew W. Appel](http://www.cs.princeton.edu/~appel/),
@@ -32,7 +36,6 @@ for a tutorial with exercises.
 [Program Logics for Certified Compilers](https://www.cs.princeton.edu/~appel/papers/plcc.pdf), by Andrew W. Appel et al.,
 Cambridge University Press, 2014.
 Available in [hardcover](https://www.barnesandnoble.com/w/program-logics-for-certified-compilers-andrew-w-appel/1126363773).
-
 
 
 

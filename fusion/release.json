@@ -1,0 +1,17 @@
+{
+  "api_version": 1,
+  "fusion_revision": "dbd55a6b1af2a91246f0890569c87ad39af9b3d4",
+  "package": "coq-vst",
+  "patch_sha256": "ab7744ec54cd56e54df06ec011456b8fa77b2310846f0f86f86ba3f7dd60966f",
+  "schema": "ccv-vst-fusion-v1",
+  "target": {
+    "abi": "standard",
+    "arch": "x86_64",
+    "compcert_version": "3.17",
+    "coq_version": "9.0.0",
+    "endianness": "little"
+  },
+  "upstream_sha256": "1757388e23a0f44147b4a0b7e771b91b0bf5f99ecd0f33c7e07c4f7bf5a39f70",
+  "upstream_version": "2.16",
+  "version": "2.16+ccv-fusion.1"
+}

@@ -103,3 +103,5 @@ lib/proof/SC_atomics_extern.v
 zlist/.Makefile.coq.d
 zlist/Makefile.coq
 zlist/Makefile.coq.conf
+fusion/.build/
+/ccv-dependency.json

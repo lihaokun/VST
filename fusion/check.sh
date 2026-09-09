@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Check the installed package selected by the caller's opam environment.
+set -euo pipefail
+root=$(realpath "$(dirname "$0")/..")
+test "$(pwd -P)" = "$root" || { printf '%s\n' 'Run from the VST checkout root.' >&2; exit 2; }
+for var in COQLIB ROCQLIB ROCQCORELIB COQPATH ROCQPATH; do
+  test -z "${!var:-}" || { printf 'Unexpected library override: %s\n' "$var" >&2; exit 2; }
+done
+prefix=$(opam var prefix)
+python3 util/fusion_manifest.py verify "$prefix/lib/coq/user-contrib/VST"
+mkdir -p fusion/.build/tests
+cp fusion/tests/*.v fusion/.build/tests/
+(
+  cd fusion/.build
+  { printf '%s\n' '-Q tests ""'; printf '%s\n' tests/*.v; } > _CoqProject
+  coq_makefile -f _CoqProject -o Makefile.coq
+  make -f Makefile.coq clean
+  make -f Makefile.coq -j2 tests/fusion_checks.vo
+)
+coqtop -quiet -Q fusion/.build/tests '' < fusion/audit.coq > fusion/.build/audit.log 2>&1
+if grep -Eq 'Error:|Anomaly:|Warning:' fusion/.build/audit.log; then
+  printf '%s\n' 'Audit failed; inspect fusion/.build/audit.log' >&2; exit 1
+fi
+awk '/^[A-Za-z_][A-Za-z_0-9.]*[[:space:]]*:/ {
+  sub(/[[:space:]]*:.*/, "")
+  if ($0 == "prop_ext") $0 = "Axioms.prop_ext"
+  if ($0 == "functional_extensionality_dep") $0 = "FunctionalExtensionality.functional_extensionality_dep"
+  if ($0 != "Axioms") print
+}' fusion/.build/audit.log | sort -u > fusion/.build/audit.names
+diff -u fusion/assumptions.allowlist fusion/.build/audit.names
+coqchk -silent -Q fusion/.build/tests '' fusion_checks
