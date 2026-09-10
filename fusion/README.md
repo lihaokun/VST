@@ -1,10 +1,11 @@
-# Optional exact stores and reusable views — version-2 candidate
+# Optional exact stores and reusable views
 
-Candidate branch: `fusion/views-api-v2`, based on the published version-1 commit
-`1d6931e960c71636402a3c73a7c177fe1edccfcc` (VST 2.16).
-Candidate package: `coq-vst.2.16+ccv-fusion.2`. No version-2 tag has been published.
+Maintained branch: `fusion/vst-2.16`, based on VST 2.16. The complete view API
+has been integrated into this original branch. There is no separate supported
+store-only line and no v1/v2 selection for clients. Package version numbers and
+source inventories identify builds; they are not a catalogue of supported releases.
 
-The statement logic and semantic exact-store rule are unchanged. This candidate
+The statement logic and semantic exact-store rule are unchanged. This implementation
 promotes the previously test-local general memory/view proofs into installed
 `VST.floyd.FusionMemvals` and `VST.floyd.FusionViews64` modules. `FusionStore`
 re-exports the views, so ordinary clients can use:
@@ -21,7 +22,7 @@ The API map, prerequisites and implementation-helper boundary are in
 than compiling a second view implementation. These are general library lemmas,
 not pre-proved user function bodies.
 
-## Isolated validation while a version-1 run is active
+## Isolated validation while an existing run is active
 
 From this worktree, using an existing compatible compiler/CompCert environment:
 
@@ -29,7 +30,7 @@ From this worktree, using an existing compatible compiler/CompCert environment:
 opam exec --switch=vst-fusion-public-2.16-1 -- bash fusion/check-staged.sh
 ```
 
-This clean-builds the candidate VST, installs into `fusion/.candidate/VST`,
+This clean-builds the current VST, installs into `fusion/.candidate/VST`,
 builds every object in the install inventory, and tests that installation with
 an explicit private loadpath. Only the separate zlist dependency is copied from
 the selected compiler environment; VST core/Floyd/concurrency are compiled here.
@@ -49,18 +50,27 @@ The install target now builds its declared objects first and propagates copy
 errors. The resulting staging installation has 279 `.vo` files (including the
 previously unbuilt examples), and the final client/audit/kernel checks passed.
 
-## Release boundary
+## Development and installation
 
-Version-2 metadata uses `ccv-vst-fusion-v2`, `api_version=2`, a base-release commit,
-and a seven-source payload inventory. The script `fusion/update_payload.py`
-updates/checks that inventory after source changes. The existing version-1 CCV
-detector and release locks intentionally do not accept this candidate silently.
+The package currently records `ccv-vst-fusion-v2`, `api_version=2` and the
+seven-source inventory. These describe the current interface and installed files,
+not an instruction to maintain an old compatibility path. The script
+`fusion/update_payload.py` updates/checks the source inventory after source edits.
 
-After review and an explicit new release, `fusion/install.sh` defaults to the
-separate `vst-fusion-2.16-2` switch. It still requires a clean committed checkout.
-Do not overwrite or move the published version-1 tag. A currently running proof
-must continue using its locked version; importing version-1 generic reference
-sources under that run's normal workflow is a separate matter.
+Installation follows the public development branch, not a fixed tag/commit:
+
+```sh
+git clone --branch fusion/vst-2.16 https://github.com/lihaokun/VST.git
+cd VST
+bash fusion/install.sh vst-fusion 4
+```
+
+Before an update, finish the active verification run, update the clean checkout
+with `git pull --ff-only`, and rerun the installer. It checks that the checkout
+matches the branch being installed so the accompanying tests match that code.
+It does not maintain/reinstall the old store-only implementation. The presently
+running run's installed files are left alone until it finishes; historical Git
+tags need not be rewritten or deleted for this policy.
 
 Supported candidate target remains x86-64 Linux, standard ABI, little-endian,
 OCaml 4.14.2, Rocq 9.0.0 and CompCert 3.17. No new global correctness axiom is
