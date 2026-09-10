@@ -12,17 +12,20 @@ prefix=${OPAM_SWITCH_PREFIX:?Run this check through opam exec --switch=...}
 test "$(dirname "$(command -v coqc)")" = "$prefix/bin" || {
   printf '%s\n' 'Compiler PATH does not match OPAM_SWITCH_PREFIX.' >&2; exit 2;
 }
-python3 util/fusion_manifest.py verify "$prefix/lib/coq/user-contrib/VST"
+# An explicit staging root is for candidate validation only. The active package
+# and its toolchain lock are never changed by this command.
+vst=${1:-$prefix/lib/coq/user-contrib/VST}
+python3 util/fusion_manifest.py verify "$vst"
 mkdir -p fusion/.build/tests
 cp fusion/tests/*.v fusion/.build/tests/
 (
   cd fusion/.build
-  { printf '%s\n' '-Q tests ""'; printf '%s\n' tests/*.v; } > _CoqProject
+  { printf -- '-Q "%s" VST\n' "$vst"; printf '%s\n' '-Q tests ""'; printf '%s\n' tests/*.v; } > _CoqProject
   coq_makefile -f _CoqProject -o Makefile.coq
   make -f Makefile.coq clean
-  make -f Makefile.coq -j2 tests/fusion_checks.vo
+  make -f Makefile.coq -j2 tests/fusion_checks.vo tests/views_client.vo
 )
-coqtop -quiet -Q fusion/.build/tests '' < fusion/audit.coq > fusion/.build/audit.log 2>&1
+coqtop -quiet -Q "$vst" VST -Q fusion/.build/tests '' < fusion/audit.coq > fusion/.build/audit.log 2>&1
 if grep -Eq 'Error:|Anomaly:|Warning:' fusion/.build/audit.log; then
   printf '%s\n' 'Audit failed; inspect fusion/.build/audit.log' >&2; exit 1
 fi
@@ -33,4 +36,4 @@ awk '/^[A-Za-z_][A-Za-z_0-9.]*[[:space:]]*:/ {
   if ($0 != "Axioms") print
 }' fusion/.build/audit.log | sort -u > fusion/.build/audit.names
 diff -u fusion/assumptions.allowlist fusion/.build/audit.names
-coqchk -silent -Q fusion/.build/tests '' fusion_checks
+coqchk -silent -Q "$vst" VST -Q fusion/.build/tests '' fusion_checks views_client

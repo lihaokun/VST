@@ -1,70 +1,68 @@
-# Optional exact-store extension for VST 2.16
+# Optional exact stores and reusable views — version-2 candidate
 
-Development branch: `fusion/vst-2.16`. Release tag: `v2.16-ccv-fusion.1`.
-Based on upstream `v2.16`, commit `a18d024633dfc4036247872b3e8650a961ac5891`.
+Candidate branch: `fusion/views-api-v2`, based on the published version-1 commit
+`1d6931e960c71636402a3c73a7c177fe1edccfcc` (VST 2.16).
+Candidate package: `coq-vst.2.16+ccv-fusion.2`. No version-2 tag has been published.
 
-This branch preserves the public sealed Floyd judgment and adds an optional
-`MainTheorem.semax_store_exact` rule, with `VST.floyd.FusionStore` providing the
-nth-SEP ramification wrapper. Ordinary `mapsto`, `forward`, and VSU interfaces
-retain their existing meanings. The deep assignment antecedent adds a third
-branch; assignment inversion, frame, context/composite transport and soundness
-are updated. Internal `DeepEmbeddedSoundness` takes an additional capability.
+The statement logic and semantic exact-store rule are unchanged. This candidate
+promotes the previously test-local general memory/view proofs into installed
+`VST.floyd.FusionMemvals` and `VST.floyd.FusionViews64` modules. `FusionStore`
+re-exports the views, so ordinary clients can use:
 
-The five proof payloads are byte-identical to the tested VST-debug snapshot
-`dbd55a6b1af2a91246f0890569c87ad39af9b3d4`. That historical payload revision remains
-in `fusion/release.json`; it is not a claim that this fork has that Git commit.
-The actual fork identity is the release Git commit/tag. The repository contains
-all build inputs: installation does not read VST-debug or CCV.
-
-## Install on another machine
-
-Initially supported: x86-64 Linux, Python 3.12+, opam, Git, make/C build tools,
-clang, GMP and pkg-config. Initialize opam and configure repositories named
-`default` and `coq-released` before installation. The recipe pins OCaml 4.14.2,
-Coq/Rocq 9.0.0, CompCert 3.17 and other tested dependency versions. Repository
-metadata and host packages are not a bit-for-bit OS image.
-
-```sh
-git clone --branch v2.16-ccv-fusion.1 https://github.com/Lin23299/VST.git VST-fusion
-cd VST-fusion
-# Record/verify git rev-parse HEAD against the published release commit.
-bash fusion/install.sh vst-fusion-2.16-1 4
+```coq
+Require Import VST.floyd.proofauto VST.floyd.FusionStore.
+Check exact_Mint64_has_low32_mapsto_le.
+Check exact_Mint64_has_mapsto.
+Check semax_store_exact_nth_ram.
 ```
 
-The script refuses dirty source trees and existing unowned destinations. It pins
-the exact checkout commit, builds a complete `coq-vst.2.16+ccv-fusion.1` package
-in a dedicated switch, then tests the installed library. It never sets the global
-default switch, edits an existing stock switch, or assumes CCV is installed.
-Keep the clone for its local Git pin, or explicitly repin the same commit to the
-remote repository after installation.
+The API map, prerequisites and implementation-helper boundary are in
+[views-api.md](views-api.md). Test code now consumes this installed API rather
+than compiling a second view implementation. These are general library lemmas,
+not pre-proved user function bodies.
 
-Use the package without changing the global default:
+## Isolated validation while a version-1 run is active
+
+From this worktree, using an existing compatible compiler/CompCert environment:
 
 ```sh
-opam exec --switch=vst-fusion-2.16-1 -- coqc your_proof.v
-opam exec --switch=vst-fusion-2.16-1 -- bash fusion/check.sh
+opam exec --switch=vst-fusion-public-2.16-1 -- bash fusion/check-staged.sh
 ```
 
-`fusion/check.sh` compiles a real arbitrary-input wide-store/narrow-load seed,
-ordinary caller/main and stock VSU, and checks wrong-body/sealing regressions,
-assumptions and the kernel. No separate `exact_semax` judgment is imported.
-The main function uses standard `main_post`; this is a VSU test, not an extra
-termination, dry-safety or compiled-binary theorem.
+This clean-builds the candidate VST, installs into `fusion/.candidate/VST`,
+builds every object in the install inventory, and tests that installation with
+an explicit private loadpath. Only the separate zlist dependency is copied from
+the selected compiler environment; VST core/Floyd/concurrency are compiled here.
+It does not replace files in the selected switch, change its pin, or modify any
+running CCV worktree/lock/skill.
 
-## Package and audit
+The result is an **actual staging installation**, not a registered opam switch or
+published release. Installed modules, the old seed/store/load/VSU regressions,
+new overlapping-view/frame clients, a Fragment counterexample, assumptions and
+recursive kernel checking are exercised. It is not a complete CCV FSM run.
 
-`make vst` builds the standard library closure including `simpleconc`; installation
-also includes the concurrency/atomics dependencies needed by allocator clients.
-New `.v/.vo` modules are included explicitly. No precompiled VST source input is
-accepted. The separate zlist dependency is built in the selected switch.
+The initial candidate clean build succeeded. Its first client check exposed a
+missing explicit `proofauto` import and was corrected. Installation also exposed
+an inherited upstream issue: the install inventory listed example `.vo` files
+that `make vst` had not built, and a shell loop could conceal those copy failures.
+The install target now builds its declared objects first and propagates copy
+errors. The resulting staging installation has 279 `.vo` files (including the
+previously unbuilt examples), and the final client/audit/kernel checks passed.
 
-Installed `VST/ccv-fusion.json` records target, source payload identity and every
-installed `.vo` hash. `util/fusion_manifest.py verify <installed-VST-root>` checks
-inventory integrity; `fusion/check.sh` separately verifies proofs and public APIs.
-The manifest is not publisher authentication. Normal logical dependencies remain;
-the semantic soundness audit includes the two CompCert `Events.*_sem` parameters,
-but no new project correctness axiom or `Events.*_properties` assumption.
+## Release boundary
 
-The source inventory hash in `fusion/payload.sha256` is
-`ab7744ec54cd56e54df06ec011456b8fa77b2310846f0f86f86ba3f7dd60966f`.
-It hashes sorted `<source-sha256>  <relative-path>\n` lines, not a Git diff.
+Version-2 metadata uses `ccv-vst-fusion-v2`, `api_version=2`, a base-release commit,
+and a seven-source payload inventory. The script `fusion/update_payload.py`
+updates/checks that inventory after source changes. The existing version-1 CCV
+detector and release locks intentionally do not accept this candidate silently.
+
+After review and an explicit new release, `fusion/install.sh` defaults to the
+separate `vst-fusion-2.16-2` switch. It still requires a clean committed checkout.
+Do not overwrite or move the published version-1 tag. A currently running proof
+must continue using its locked version; importing version-1 generic reference
+sources under that run's normal workflow is a separate matter.
+
+Supported candidate target remains x86-64 Linux, standard ABI, little-endian,
+OCaml 4.14.2, Rocq 9.0.0 and CompCert 3.17. No new global correctness axiom is
+introduced. The audit still distinguishes package soundness dependencies from
+ordinary view/body/VSU dependencies.

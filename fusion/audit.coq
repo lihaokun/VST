@@ -1,6 +1,7 @@
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.FusionExactSem.
 Require Import fusion_checks verif_fusion fusion_store.
+Require Import views_client.
 Set Printing All.
 Print Assumptions VST.floyd.SeparationLogicAsLogicSoundness.MainTheorem.semax_store_exact.
 Print Assumptions FusionExactSem.semax_store_exact.
@@ -13,4 +14,10 @@ Print Assumptions body_main.
 Print Assumptions ordinary_forward_store_regression.
 Print Assumptions seedVSU.
 Print Assumptions checked_seedVSU.
+Print Assumptions VST.floyd.FusionViews64.exact_Mint64_has_low32_mapsto_le.
+Print Assumptions VST.floyd.FusionViews64.exact_Mint64_has_high32_mapsto_le.
+Print Assumptions VST.floyd.FusionViews64.exact_Mint64_has_mapsto.
+Print Assumptions borrow_three_views_with_frame.
+Print Assumptions borrow_low_view_with_frame.
+Print Assumptions wide_decode_does_not_fix_low_decode.
 Quit.

@@ -523,7 +523,7 @@ ZLIST_FILES= \
   sublist.v Zlength_solver.v list_solver.v
 
 FLOYD_FILES= \
-   FusionExact.v FusionExactSem.v FusionStore.v \
+   FusionExact.v FusionExactSem.v FusionMemvals.v FusionViews64.v FusionStore.v \
    coqlib3.v base.v seplog_tactics.v typecheck_lemmas.v val_lemmas.v assert_lemmas.v find_nth_tactic.v const_only_eval.v \
    base2.v functional_base.v go_lower.v \
    library.v proofauto.v computable_theorems.v computable_functions.v \
@@ -692,6 +692,8 @@ EXTRA_INSTALL_FILES = \
   HISTORY \
   CHANGES \
   README.md \
+  fusion/README.md \
+  fusion/views-api.md \
   VERSION \
   msl/CREDITS \
   msl/EXTRACTION \
@@ -836,10 +838,11 @@ VST.config:
 # Note: doc files are installed into the coq destination folder.
 # This is not ideal but otherwise it gets tricky to handle variants
 install: VST.config vst
+	$(MAKE) $(INSTALL_FILES_VO)
 	install -d "$(INSTALLDIR)"
-	for d in $(sort $(dir $(INSTALL_FILES) $(EXTRA_INSTALL_FILES))); do install -d "$(INSTALLDIR)/$$d"; done
-	for f in $(INSTALL_FILES); do install -m 0644 $$f "$(INSTALLDIR)/$$(dirname $$f)"; done
-	for f in $(EXTRA_INSTALL_FILES); do install -m 0644 $$f "$(INSTALLDIR)/$$(dirname $$f)"; done
+	set -e; for d in $(sort $(dir $(INSTALL_FILES) $(EXTRA_INSTALL_FILES))); do install -d "$(INSTALLDIR)/$$d"; done
+	set -e; for f in $(INSTALL_FILES); do install -m 0644 $$f "$(INSTALLDIR)/$$(dirname $$f)"; done
+	set -e; for f in $(EXTRA_INSTALL_FILES); do install -m 0644 $$f "$(INSTALLDIR)/$$(dirname $$f)"; done
 
 build-iris: _CoqProject
 	$(COQC) $(COQFLAGS) $(PROGSDIR)/incr.v

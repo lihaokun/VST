@@ -1,13 +1,13 @@
 opam-version: "2.0"
 name: "coq-vst"
-version: "2.16+ccv-fusion.1"
-synopsis: "VST 2.16 with the committed CCV fusion store rule"
+version: "2.16+ccv-fusion.2"
+synopsis: "VST 2.16 with optional exact stores and reusable integer views"
 maintainer: "CCV toolchain maintainers"
 authors: ["VST team" "CCV fusion contributors"]
 license: "BSD-2-Clause"
-homepage: "https://github.com/Lin23299/VST"
-bug-reports: "https://github.com/Lin23299/VST/issues"
-dev-repo: "git+https://github.com/Lin23299/VST.git"
+homepage: "https://github.com/lihaokun/VST"
+bug-reports: "https://github.com/lihaokun/VST/issues"
+dev-repo: "git+https://github.com/lihaokun/VST.git"
 depends: [
   "ocaml" {= "4.14.2"}
   "ocaml-base-compiler" {= "4.14.2"}

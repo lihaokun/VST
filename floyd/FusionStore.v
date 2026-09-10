@@ -1,5 +1,5 @@
 Require Import VST.floyd.proofauto.
-Require Export VST.floyd.FusionExact.
+Require Export VST.floyd.FusionViews64.
 Import LiftNotation.
 Local Open Scope logic.
 
