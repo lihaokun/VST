@@ -1,7 +1,7 @@
 opam-version: "2.0"
 name: "coq-vst"
-version: "2.16+ccv-fusion.2"
-synopsis: "VST 2.16 with optional exact stores and reusable integer views"
+version: "2.16+fusion"
+synopsis: "VST with optional exact stores and reusable integer views"
 maintainer: "CCV toolchain maintainers"
 authors: ["VST team" "CCV fusion contributors"]
 license: "BSD-2-Clause"
@@ -10,59 +10,19 @@ bug-reports: "https://github.com/lihaokun/VST/issues"
 dev-repo: "git+https://github.com/lihaokun/VST.git"
 depends: [
   "ocaml" {= "4.14.2"}
-  "ocaml-base-compiler" {= "4.14.2"}
   "coq" {= "9.0.0"}
   "coq-core" {= "9.0.0"}
   "coq-stdlib" {= "9.0.0"}
-  "coqide-server" {= "9.0.0"}
-  "rocq-core" {= "9.0.0"}
-  "rocq-runtime" {= "9.0.0"}
-  "rocq-stdlib" {= "9.0.0"}
   "coq-compcert" {= "3.17"}
   "coq-flocq" {= "4.2.2"}
   "coq-vst-zlist" {= "2.13"}
-  "coq-menhirlib" {= "20260209"}
-  "menhir" {= "20260209"}
-  "menhirCST" {= "20260209"}
-  "menhirGLR" {= "20260209"}
-  "menhirLib" {= "20260209"}
-  "menhirSdk" {= "20260209"}
-  "dune" {= "3.23.1"}
-  "dune-configurator" {= "3.23.1"}
-  "ocamlfind" {= "1.9.8"}
-  "zarith" {= "1.14"}
-  "num" {= "1.6"}
-  "ocamlbuild" {= "0.16.1"}
-  "base" {= "v0.16.5"}
-  "conf-clang" {= "2"}
-  "conf-gmp" {= "5"}
-  "conf-linux-libc-dev" {= "0"}
-  "conf-pkg-config" {= "5"}
-  "cppo" {= "1.8.0"}
-  "csexp" {= "1.5.2"}
-  "jsonrpc" {= "1.27.0"}
-  "lsp" {= "1.27.0"}
-  "ocaml-compiler-libs" {= "v0.12.4"}
-  "ocaml-config" {= "2"}
-  "octavius" {= "1.2.2"}
-  "ppx_derivers" {= "1.2.1"}
-  "ppx_deriving" {= "6.0.3"}
-  "ppx_optcomp" {= "v0.16.0"}
-  "ppx_yojson_conv_lib" {= "v0.16.0"}
-  "ppxlib" {= "0.35.0"}
-  "result" {= "1.5"}
-  "sexplib0" {= "v0.16.0"}
-  "stdio" {= "v0.16.0"}
-  "stdlib-shims" {= "0.3.0"}
-  "topkg" {= "1.1.1"}
-  "uutf" {= "1.0.4"}
-  "yojson" {= "3.0.0"}
 ]
 build: [
-  ["python3" "util/fusion_manifest.py" "check-source" "." "%{lib}%/coq/user-contrib/VST"]
-  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "IGNORECOMPCERTVERSION=true" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64" "ARCH=x86"]
+  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
 ]
 install: [
-  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "IGNORECOMPCERTVERSION=true" "IGNORECOQVERSION=true" "ZLIST=platform" "BITSIZE=64" "ARCH=x86"]
-  ["python3" "util/fusion_manifest.py" "install" "%{lib}%/coq/user-contrib/VST"]
+  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
+]
+run-test: [
+  [make "-j%{jobs}%" "test-fusion" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
 ]

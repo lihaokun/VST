@@ -1,6 +1,7 @@
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.library.
-Require Import seed_union_rw bridges union_exact_view union_exact_seed_interface union_exact_seed_support.
+Require Import VST.floyd.FusionViews64.
+From VST.progs64.fusion Require Import seed_union_rw bridges union_exact_seed_interface union_exact_seed_support.
 
 Module SeedSpec (Import Layout : SEED_LAYOUT).
 Include SeedSupport Layout.

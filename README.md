@@ -1,8 +1,8 @@
 ![Verified Software Toolchain](chain.jpg)
 
 **Fusion development branch:** optional exact stores and reusable integer-view APIs
-in the same sealed Floyd logic. See [fusion/README.md](fusion/README.md) and
-[fusion/views-api.md](fusion/views-api.md). Development continues on
+in the same sealed Floyd logic. See [the API and build guide](doc/fusion.md).
+Development continues on
 `fusion/vst-2.16`; new installations use its complete current interface.
 
 with contributions from
@@ -37,4 +37,3 @@ for a tutorial with exercises.
 [Program Logics for Certified Compilers](https://www.cs.princeton.edu/~appel/papers/plcc.pdf), by Andrew W. Appel et al.,
 Cambridge University Press, 2014.
 Available in [hardcover](https://www.barnesandnoble.com/w/program-logics-for-certified-compilers-andrew-w-appel/1126363773).
-

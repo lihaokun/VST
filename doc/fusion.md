@@ -1,4 +1,4 @@
-# Exact 视图的公共 API 与安装边界
+# Exact 视图：公共 API、构建与安装
 
 ## 1. 为什么安装成模块
 
@@ -98,7 +98,41 @@ ordinary ownership
 对重叠的多个可读视图使用蕴含/`&&`，不要用 `*` 伪造重复所有权。新客户端回归把
 低字、高字、宽读和原 exact 资源用合取放在一起，并保留独立 frame，验证这条用法。
 
-## 6. 本次验证与当前 run
+## 6. 标准 opam 安装
+
+维护分支为 `fusion/vst-2.16`。使用独立环境和标准 opam，不需要专属安装器或发布清单：
+
+```sh
+opam switch create vst-fusion ocaml-base-compiler.4.14.2 --no-switch --repositories=coq-released,default
+opam pin add --switch=vst-fusion --no-action coq-vst 'git+https://github.com/lihaokun/VST.git#fusion/vst-2.16'
+opam install --switch=vst-fusion --skip-updates coq-vst
+```
+
+前置：opam 已初始化且配置了 `default` 和 `coq-released` 仓库。
+switch 名不属于 API。更新只在没有验证 run 使用此环境时显式执行：
+
+```sh
+opam update --switch=vst-fusion --development coq-vst
+opam upgrade --switch=vst-fusion --skip-updates coq-vst
+```
+
+包版本是普通依赖元数据，不是支持矩阵；历史构建的源码身份由实际 Git/opam 记录说明。
+
+## 7. 构建与回归
+
+从 VST 根目录在匹配的 opam 环境中运行：
+
+```sh
+opam exec --switch=vst-fusion -- make -j2 vst test-fusion ZLIST=platform BITSIZE=64
+opam exec --switch=vst-fusion -- make test-fusion-installed ZLIST=platform BITSIZE=64
+```
+
+普通 `make test BITSIZE=64` 也编译 `progs64/fusion/` 的回归；原 `make vst/install` 是库构建安装的唯一入口。
+`test-fusion-installed` 在独立目录重新编译客户端、审计 assumptions 并运行 coqchk，不修改安装环境。
+开发者可显式指定 `FUSION_VST_ROOT=<staging/VST>` 核候选安装，不能据源码中的模块推断已安装能力。
+候选用正常 `make install INSTALLDIR=<staging/VST>`，其 zlist 是所选环境的独立依赖。
+
+## 8. 历史验证记录
 
 已完成候选源码的编译、暂存安装、公开 import 客户端、既有 seed/body/VSU 回归、
 Fragment 反例、assumptions 和递归 `coqchk`。通用视图没有引入新的全局假设。

@@ -1,4 +1,5 @@
-Require Import VST.floyd.proofauto seed_union_rw.
+Require Import VST.floyd.proofauto.
+From VST.progs64.fusion Require Import seed_union_rw.
 Import compcert.lib.Maps.
 
 (* The identifiers and expression shapes remain those of the generated seed.

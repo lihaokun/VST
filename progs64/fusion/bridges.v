@@ -15,7 +15,7 @@
 
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.library.
-Require Import seed_union_rw.
+From VST.progs64.fusion Require Import seed_union_rw.
 
 #[export] Instance CompSpecs : compspecs. make_compspecs prog. Defined.
 

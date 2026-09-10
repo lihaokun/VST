@@ -1,7 +1,7 @@
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.FusionExactSem.
-Require Import fusion_checks verif_fusion fusion_store.
-Require Import views_client.
+Require Import VST.floyd.FusionStore.
+From VST.progs64.fusion Require Import fusion_checks verif_fusion views_client.
 Set Printing All.
 Print Assumptions VST.floyd.SeparationLogicAsLogicSoundness.MainTheorem.semax_store_exact.
 Print Assumptions FusionExactSem.semax_store_exact.

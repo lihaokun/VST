@@ -106,3 +106,4 @@ zlist/Makefile.coq.conf
 fusion/.build/
 fusion/.candidate/
 /ccv-dependency.json
+/.build/

@@ -1,4 +1,5 @@
-Require Import VST.floyd.proofauto VST.floyd.VSU seed_program verif_fusion.
+Require Import VST.floyd.proofauto VST.floyd.VSU.
+From VST.progs64.fusion Require Import seed_program verif_fusion.
 Local Existing Instance verif_fusion.CompSpecs.
 Local Open Scope logic.
 

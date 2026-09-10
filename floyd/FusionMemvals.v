@@ -1,4 +1,4 @@
-(* Reusable exact memval ownership operations. See fusion/views-api.md for the supported API. *)
+(* Reusable exact memval ownership operations. See doc/fusion.md for the supported API. *)
 
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.library.

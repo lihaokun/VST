@@ -2,7 +2,7 @@
  * A: 直接视窗转换（union 成员视图混合）
  * B: 指针 + 显式类型转换（*(T*)s 别名访问）
  * C: 同尺寸对照（官方 union hack 白名单内的形态）
- * 语义参考行为见 behavior_check.c（ccomp 实跑） */
+ * 回归证明见本目录的 verif_fusion.v。 */
 
 typedef unsigned int u32;
 typedef unsigned long long u64;

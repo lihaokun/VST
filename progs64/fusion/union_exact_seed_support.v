@@ -2,8 +2,8 @@
 
 Require Import VST.floyd.proofauto.
 Require Import VST.floyd.library.
-Require Import seed_union_rw union_exact_seed_interface.
-Require Import union_exact_view.
+From VST.progs64.fusion Require Import seed_union_rw union_exact_seed_interface.
+Require Import VST.floyd.FusionViews64.
 
 Module SeedSupport (Import Layout : SEED_LAYOUT).
 Local Existing Instance CompSpecs.

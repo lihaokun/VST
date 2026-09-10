@@ -128,13 +128,21 @@ CV2=$(shell cat $(COMPCERT_INST_DIR)/VERSION | grep "version=")
 
 ifneq ($(IGNORECOMPCERTVERSION),true)
   ifneq ($(CV1), $(CV2))
+    # 外部 CompCert 3.17 已验；bundled 模式仍要求严格一致。
+    ifeq ($(filter $(COMPCERT),platform inst_dir),)
     $(error COMPCERT VERSION MISMATCH: COMPCERT_VERSION=$(CV1) but $(COMPCERT_INST_DIR)/VERSION=$(CV2))
+    else ifneq ($(CV2),version=3.17)
+    $(error Unsupported external COMPCERT VERSION: $(CV2))
+    endif
   endif
 endif
 
 # Verify that the version of the supplied clightgen matches the version of the internal compcert
 
 COMPCERT_VERSION=$(subst version=,,$(shell grep version $(COMPCERT_INFO_PATH_REF)/VERSION))
+ifneq ($(filter $(COMPCERT),platform inst_dir),)
+COMPCERT_VERSION=$(subst version=,,$(CV2))
+endif
 
 ifdef CLIGHTGEN
   VERSION1= $(lastword $(shell $(CLIGHTGEN) --version))
@@ -692,8 +700,7 @@ EXTRA_INSTALL_FILES = \
   HISTORY \
   CHANGES \
   README.md \
-  fusion/README.md \
-  fusion/views-api.md \
+  doc/fusion.md \
   VERSION \
   msl/CREDITS \
   msl/EXTRACTION \
@@ -709,7 +716,12 @@ CC_TARGET= $(COMPCERT_INST_DIR)/cfrontend/Clight.vo
 CVFILES = $(patsubst %.c,$(PROGSDIR)/%.v,$(C_FILES))
 CVOFILES = $(patsubst %.c,$(PROGSDIR)/%.vo,$(C_FILES))
 
+FUSION_TEST_FILES=seed_program.v seed_union_rw.v bridges.v union_exact_seed_interface.v \
+  union_exact_seed_support.v union_exact_seed_spec.v verif_fusion.v fusion_checks.v views_client.v
 PROGS64_FILES=$(V64_ORDINARY) incr.v
+ifeq ($(ARCH)_$(BITSIZE),x86_64)
+PROGS64_FILES+=$(FUSION_TEST_FILES:%=fusion/%)
+endif
 
 ifeq ($(BITSIZE),64)
 PROGS_FILES=$(PROGS64_FILES)
@@ -768,6 +780,17 @@ endif
 default_target: vst $(PROGSDIR)
 vst: _CoqProject msl veric floyd simpleconc
 
+.PHONY: test-fusion test-fusion-installed
+ifeq ($(ARCH)_$(BITSIZE),x86_64)
+test-fusion: _CoqProject $(FUSION_TEST_FILES:%.v=progs64/fusion/%.vo)
+else
+test-fusion:
+	$(error test-fusion requires x86_64)
+endif
+FUSION_VST_ROOT ?= $(COQLIB)/user-contrib/VST
+test-fusion-installed:
+	bash util/check_fusion.sh "$(FUSION_VST_ROOT)"
+
 ifeq ($(BITSIZE),64)
 test: vst progs64
 	@# need this tab here to turn off special behavior of 'test' target
@@ -825,6 +848,8 @@ $(CVOFILES): compcert
 
 cvfiles: $(CVFILES)
 
+# 安装位置可由本次命令改变，不能复用前次 staging 的配置。
+.PHONY: VST.config
 VST.config:
 	(echo "# VST configuration"; \
 	echo "VST_ARCH=$(ARCH)"; \
@@ -949,6 +974,7 @@ clean:
 	rm -f $(addprefix veric/version., v vo vos vok glob) .lia.cache .nia.cache floyd/floyd.coq .depend _CoqProject _CoqProject-export $(wildcard */.*.aux)  $(wildcard */*.glob) $(wildcard */*.vo */*.vos */*.vok) compcert/*/*.{vo,vos,vok} compcert/*/*/*.{vo,vos,vok}  compcert_new/*/*.{vo,vos,vok} compcert_new/*/*/*.{vo,vos,vok}
 	rm -f progs/VSUpile/{*,*/*}.{vo,vos,vok,glob}
 	rm -f progs64/VSUpile/{*,*/*}.{vo,vos,vok,glob}
+	rm -f progs64/fusion/*.vo progs64/fusion/*.vos progs64/fusion/*.vok progs64/fusion/*.glob progs64/fusion/.*.aux
 	rm -f progs/memmgr/*.{vo,vos,vok,glob}
 	rm -f coq-ext-lib/theories/*.{vo,vos,vok,glob} InteractionTrees/theories/{*,*/*}.{vo,vos,vok,glob}
 	rm -f paco/src/*.{vo,vos,vok,glob}

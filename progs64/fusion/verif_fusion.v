@@ -1,5 +1,6 @@
 Require Import VST.floyd.proofauto.
-Require Import seed_program union_exact_seed_interface union_exact_seed_spec fusion_store.
+Require Import VST.floyd.FusionStore.
+From VST.progs64.fusion Require Import seed_program union_exact_seed_interface union_exact_seed_spec.
 Import compcert.lib.Maps.
 Local Open Scope logic.
 
