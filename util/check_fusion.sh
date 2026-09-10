@@ -20,7 +20,7 @@ cp "$root"/progs64/fusion/*.v "$work/"
   for module in FusionExact FusionExactSem FusionMemvals FusionViews64 FusionStore SeparationLogicAsLogicSoundness; do
     printf 'Locate Library VST.floyd.%s.\n' "$module" |
       "$prefix/bin/coqtop" -q -quiet "${args[@]}" > locate.log 2>&1
-    grep -Fq "$vst/floyd/$module.vo" locate.log || { cat locate.log >&2; exit 1; }
+    grep -Fxq "$vst/floyd/$module.vo" locate.log || { cat locate.log >&2; exit 1; }
   done
   "$prefix/bin/coq_makefile" "${args[@]}" ./*.v -o Makefile.coq
   make -f Makefile.coq -j2
