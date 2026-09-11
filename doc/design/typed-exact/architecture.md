@@ -199,3 +199,13 @@ Ensures：派生typed-only语句规则，正常后置保持更新后的typed exa
    分别核值域、权限、frame和编译成本；不能仅以“强前提蕴含ordinary”证明接口有用。
 
 上述是架构建议的明确化，不把尚未完成的字段组合和Agent自动化标成已验。
+
+## 9. Run2 对照实验的后续证据
+
+见 [experiments/README.md](experiments/README.md)。原始run2已在CCV归档，实验只改VST开发侧副本。
+现有工具复用可将4条辅助proof从44行缩到7行，18源重编与root公理/内核检查通过。
+接入typed scalar-store原型的19源变体也编过，但新增了回接旧union表示的桥，两个文件比前一变体多10行。
+
+这验证了scalar规则能用于真实body，同时说明G4还没完成：正式接口必须补union/field级结构桥与
+从当前SEP/表达式推导参数的前端，而不是让Agent自己承担scalar↔union与旧/新rep转换。
+该实验没有消除§8的同一资源切分、mixed-precision连续消费问题，不作为这些义务的替代证明。

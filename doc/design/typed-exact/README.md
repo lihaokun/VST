@@ -15,6 +15,7 @@
 3. [原型源码](prototypes/)
 4. [独立架构审查](architecture-review.md)
 5. [开发日志](development-log.md)
+6. [基于已归档 run2 的真实证明简化与typed原型接入实验](experiments/README.md)
 
 这些工件从 CCV 提交 `b096a28` 迁入；迁移只纠正仓库与分支归属，没有改变原型的声明或证明。
 现有可用接口说明位于 [doc/fusion.md](../../fusion.md)。

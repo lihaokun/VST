@@ -1,0 +1,200 @@
+{
+  "actual_axioms": {
+    "goals.goal_extra_goal_1": [
+      "ClassicalDedekindReals.sig_forall_dec",
+      "ClassicalDedekindReals.sig_not_dec",
+      "Classical_Prop.classic",
+      "functional_extensionality_dep",
+      "prop_ext"
+    ],
+    "link.wholeVSU": [
+      "ClassicalDedekindReals.sig_forall_dec",
+      "ClassicalDedekindReals.sig_not_dec",
+      "Classical_Prop.classic",
+      "Ensembles.Extensionality_Ensembles",
+      "functional_extensionality_dep",
+      "prop_ext"
+    ]
+  },
+  "additional_client_bridge_lines": 10,
+  "after_sha256": {
+    "lemmas_word_view.v": "be4018eef1ffaa809dab7b93ecc2e526c72d010885aa5d2098c378d01d616b96",
+    "verif_word_view_word_view_store_low.v": "5f5793a7921de7dd32fb7430a7d3610b3ba66d5d9f9cf97839dc8b9171c2a4f1"
+  },
+  "archive_id": "union-word-view-memory_safety_leak_freedom_lifecycle-2026-09-11",
+  "before_sha256": {
+    "lemmas_word_view.v": "afb8987415d991916c23bed3395a8e5199fcfaf2274fb82edb0dfb5944684639",
+    "verif_word_view_word_view_store_low.v": "5dd4c69f4d7bed0d8ae065ff80b30516d7739245fbfd6050390ee3afd6fc6a8e"
+  },
+  "certification": "experiment only; original cert does not certify this variant",
+  "mode": "typed-store-prototype",
+  "original_workspace_commit": "0cccc8e848c8e9578062f3995d20637e73e34df7",
+  "proof_changes": {
+    "body_word_view_store_low": {
+      "after_proof_lines": 19,
+      "before_proof_lines": 21
+    },
+    "wv_load_low32_address": {
+      "after_proof_lines": 2,
+      "before_proof_lines": 17
+    },
+    "wv_loword_unsigned": {
+      "after_proof_lines": 1,
+      "before_proof_lines": 4
+    },
+    "wv_store_whole_address": {
+      "after_proof_lines": 2,
+      "before_proof_lines": 14
+    },
+    "wv_store_whole_eval": {
+      "after_proof_lines": 2,
+      "before_proof_lines": 9
+    }
+  },
+  "schema_version": 1,
+  "source_count": 19,
+  "status": "passed",
+  "steps": [
+    {
+      "name": "coq_makefile",
+      "returncode": 0,
+      "seconds": 0.024819559417665005
+    },
+    {
+      "name": "clean-build",
+      "returncode": 0,
+      "seconds": 21.51347948424518
+    },
+    {
+      "name": "admit-alloc_ef.v",
+      "returncode": 0,
+      "seconds": 0.027353673242032528
+    },
+    {
+      "name": "admit-alloc_iface.v",
+      "returncode": 0,
+      "seconds": 0.0247530834749341
+    },
+    {
+      "name": "admit-alloc_min.v",
+      "returncode": 0,
+      "seconds": 0.024750138632953167
+    },
+    {
+      "name": "admit-asi_word_view.v",
+      "returncode": 0,
+      "seconds": 0.028590558096766472
+    },
+    {
+      "name": "admit-cce_word_view.v",
+      "returncode": 0,
+      "seconds": 0.023379812017083168
+    },
+    {
+      "name": "admit-ccv_vsu_tactics.v",
+      "returncode": 0,
+      "seconds": 0.029331836849451065
+    },
+    {
+      "name": "admit-cs_word_view.v",
+      "returncode": 0,
+      "seconds": 0.030809436924755573
+    },
+    {
+      "name": "admit-goal_claims.v",
+      "returncode": 0,
+      "seconds": 0.024020852521061897
+    },
+    {
+      "name": "admit-goals.v",
+      "returncode": 0,
+      "seconds": 0.022620458155870438
+    },
+    {
+      "name": "admit-lemmas_word_view.v",
+      "returncode": 0,
+      "seconds": 0.027450155466794968
+    },
+    {
+      "name": "admit-link.v",
+      "returncode": 0,
+      "seconds": 0.02638206910341978
+    },
+    {
+      "name": "admit-rep_word_view.v",
+      "returncode": 0,
+      "seconds": 0.026129192672669888
+    },
+    {
+      "name": "admit-spec_word_view.v",
+      "returncode": 0,
+      "seconds": 0.026307097636163235
+    },
+    {
+      "name": "admit-typed_exact_prototype.v",
+      "returncode": 0,
+      "seconds": 0.022266470827162266
+    },
+    {
+      "name": "admit-verif_word_view.v",
+      "returncode": 0,
+      "seconds": 0.027809052728116512
+    },
+    {
+      "name": "admit-verif_word_view_main.v",
+      "returncode": 0,
+      "seconds": 0.022739914245903492
+    },
+    {
+      "name": "admit-verif_word_view_word_view_store_low.v",
+      "returncode": 0,
+      "seconds": 0.022620247676968575
+    },
+    {
+      "name": "admit-verif_word_view_word_view_update.v",
+      "returncode": 0,
+      "seconds": 0.022050874307751656
+    },
+    {
+      "name": "admit-word_view.v",
+      "returncode": 0,
+      "seconds": 0.031092309392988682
+    },
+    {
+      "name": "axioms-goals.goal_extra_goal_1",
+      "returncode": 0,
+      "seconds": 1.917549416422844
+    },
+    {
+      "name": "axioms-link.wholeVSU",
+      "returncode": 0,
+      "seconds": 6.660470632836223
+    },
+    {
+      "name": "coqchk",
+      "returncode": 0,
+      "seconds": 260.75589800439775
+    }
+  ],
+  "switch": "vst-fusion",
+  "unchanged_files": [
+    "alloc_ef.v",
+    "alloc_iface.v",
+    "alloc_min.v",
+    "asi_word_view.v",
+    "axiom-whitelist.txt",
+    "cce_word_view.v",
+    "ccv_vsu_tactics.v",
+    "cs_word_view.v",
+    "external-assumptions.txt",
+    "goal_claims.v",
+    "goals.v",
+    "link.v",
+    "rep_word_view.v",
+    "spec_word_view.v",
+    "verif_word_view.v",
+    "verif_word_view_main.v",
+    "verif_word_view_word_view_update.v",
+    "word_view.v"
+  ]
+}
