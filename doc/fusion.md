@@ -1,21 +1,21 @@
 # Exact 视图：公共 API、构建与安装
 
-## 1. 为什么安装成模块
+## 1. 概述
 
-“已经有 Qed 源码”“用户可以 Require 到它”“把某个名字承诺为可复用 API”是三件事。
+Fusion 在 VST 2.16 上提供可选的精确写入规则和可复用的内存视图引理，用于验证
+宽整数写入后的重叠窄读，例如写入 union 的 64 位成员后读取其 32 位成员。
 
-版本 1 的核心目标是验证新增强 store 能否进入同一个 sealed Floyd，并被原版 VSU
-消费。为避免 `proofauto` 初始化循环，exact 谓词和 semantic store 被先拆到低层；
-随后只把 primitive 和 nth-SEP store wrapper 纳入了安装清单。通用视图证明随
-实验代码一起留在 `fusion/tests/union_exact_view.v`，虽然有完整证明和回归，却没有
-进入用户的 `VST.floyd.*` loadpath。
+普通 `mapsto` 描述解码后的值，并不总能确定较窄读取所需的具体编码。
+Fusion 在写入时通过 `exact_mapsto` 保留精确的 memval 表示，再从中导出普通可读视图，
+使后续读取仍能保持完整对象的所有权。
 
-这是一项最小原型阶段留下的库打包缺口，不是这些引理只能用于测试，也不是证明不可靠。
-正式 worker 因此能找到 store 规则，却需要重新寻找、复制甚至推导低字视图。仅告诉
-它“用 exact 表示”不足以消除这部分工作。
+这些能力集成在同一个 sealed Floyd `semax` 中，可与普通 `semax_body`、函数调用及
+VSU 组合使用。公共接口包括精确 store、memval 前缀借用与拼接，以及整数的低字、
+高字、宽读和拆分重组视图；具体前提见第 3–5 节。
 
-当前实现把通用代码迁到库中，测试目录只保留 import 层和实际客户端回归。
-业务 union 的布局、funspec、函数 body 仍由用户证明，不混入通用 API。
+使用入口为 `VST.floyd.FusionStore`。应用程序的布局、对齐、所有权条件、funspec 和
+函数体证明由使用者提供。当前验证环境为 x86-64 小端、Rocq 9.0.0 和 CompCert 3.17；
+安装与测试方法见第 6–7 节。
 
 ## 2. 分层
 
@@ -131,12 +131,3 @@ opam exec --switch=vst-fusion -- make test-fusion-installed ZLIST=platform BITSI
 `test-fusion-installed` 在独立目录重新编译客户端、审计 assumptions 并运行 coqchk，不修改安装环境。
 开发者可显式指定 `FUSION_VST_ROOT=<staging/VST>` 核候选安装，不能据源码中的模块推断已安装能力。
 候选用正常 `make install INSTALLDIR=<staging/VST>`，其 zlist 是所选环境的独立依赖。
-
-## 8. 历史验证记录
-
-已完成候选源码的编译、暂存安装、公开 import 客户端、既有 seed/body/VSU 回归、
-Fragment 反例、assumptions 和递归 `coqchk`。通用视图没有引入新的全局假设。
-
-这是 staged install，不是对运行中的 CCV 工具链做原地升级。开发继续在原
-`fusion/vst-2.16` 分支上，新 run 统一使用完整接口，不维护旧接口的选择/兼容路线。
-当前 run 完成后再统一更新安装环境；不需要为重现接口不完整的旧实验保留额外版本锁。
