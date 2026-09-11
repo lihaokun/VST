@@ -33,6 +33,13 @@ The maintained branch is **`fusion/vst-2.16`**, with one complete public interfa
 The currently validated environment is x86-64 little-endian, Rocq 9.0.0 and
 CompCert 3.17.
 
+### Typed exact layer development
+
+The next typed ownership interface is being developed on **`fusion/vst-2.16-dev`**.
+See [the development design and prototypes](doc/design/typed-exact/README.md).
+This work is not yet a released API; **`fusion/vst-2.16`** remains the consumer
+upstream and receives the feature only after implementation and validation are complete.
+
 ## Upstream VST
 
 With contributions from
