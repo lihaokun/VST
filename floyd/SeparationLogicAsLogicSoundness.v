@@ -27,17 +27,62 @@ Require Import VST.veric.SeparationLogic.
 Require Import VST.floyd.SeparationLogicFacts.
 Require Import VST.floyd.SeparationLogicAsLogic.
 Require Import VST.veric.SeparationLogicSoundness.
+Require Import VST.floyd.FusionExact VST.floyd.FusionExactSem.
 Local Open Scope logic.
 Require Import VST.veric.ghost_PCM.
 
-Import Clight.
+Import Clight expr2.
+Import VST.msl.seplog.
+Local Open Scope logic.
 
 Require Import VST.veric.Clight_core.
+
+Module Type EXACT_STORE_BACKWARD.
+  Declare Module CSHL_Def : CLIGHT_SEPARATION_HOARE_LOGIC_DEF.
+  Parameter semax_store_exact_backward :
+    forall {CS : compspecs} {Espec : OracleKind} Delta e1 e2 P,
+    @CSHL_Def.semax CS Espec Delta (exact_store_pre Delta e1 e2 P)
+      (Sassign e1 e2) (normal_ret_assert P).
+End EXACT_STORE_BACKWARD.
+
+Module VericExactStore <: EXACT_STORE_BACKWARD with Module CSHL_Def := VericDef.
+Module CSHL_Def := VericDef.
+Module Conseq := GenConseq (VericDef) (VericMinimumSeparationLogic).
+Module ConseqFacts := GenConseqFacts (VericDef) (Conseq).
+Module ExtrFacts := GenExtrFacts (VericDef) (Conseq) (VericMinimumSeparationLogic).
+Import Conseq ConseqFacts ExtrFacts.
+Local Transparent mpred Nveric Sveric Cveric Iveric Rveric SIveric SRveric Bveric.
+
+Lemma semax_store_exact_backward :
+  forall {CS : compspecs} {Espec : OracleKind} Delta e1 e2 P,
+  @CSHL_Def.semax CS Espec Delta (exact_store_pre Delta e1 e2 P)
+    (Sassign e1 e2) (normal_ret_assert P).
+Proof.
+  intros. unfold exact_store_pre.
+  apply VericMinimumSeparationLogic.semax_extract_exists; intro sh.
+  apply VericMinimumSeparationLogic.semax_extract_exists; intro ch.
+  apply semax_extract_prop; intros [WS HM].
+  rewrite tc_expr_eq.
+  eapply semax_post' with (R' := (
+    (fun rho => exact_mapsto sh ch
+      (force_val (sem_cast (typeof e2) (typeof e1) (eval_expr e2 rho)))
+      (eval_lvalue e1 rho)) *
+    ((fun rho => exact_mapsto sh ch
+      (force_val (sem_cast (typeof e2) (typeof e1) (eval_expr e2 rho)))
+      (eval_lvalue e1 rho)) -* P))%logic);
+    [| exact (FusionExactSem.semax_store_exact Delta e1 e2 sh
+    ((fun rho => exact_mapsto sh ch
+      (force_val (sem_cast (typeof e2) (typeof e1) (eval_expr e2 rho)))
+      (eval_lvalue e1 rho)) -* P) ch (writable_writable0 WS) HM)].
+  apply andp_left2. apply modus_ponens_wand.
+Qed.
+End VericExactStore.
 
 Module DeepEmbeddedSoundness
        (Def: CLIGHT_SEPARATION_HOARE_LOGIC_DEF)
        (MinimumLogic: MINIMUM_CLIGHT_SEPARATION_HOARE_LOGIC with Module CSHL_Def := Def)
-       (Sound: SEPARATION_HOARE_LOGIC_SOUNDNESS with Module CSHL_Def := Def)
+        (Sound: SEPARATION_HOARE_LOGIC_SOUNDNESS with Module CSHL_Def := Def)
+        (ExactStore: EXACT_STORE_BACKWARD with Module CSHL_Def := Def)
        <: SEPARATION_HOARE_LOGIC_SOUNDNESS.
 
 Module DeepEmbedded := DeepEmbedded (Def) (MinimumLogic).
@@ -149,7 +194,9 @@ Proof.
   + apply CallB.semax_call_backward.
   + apply MinimumLogic.semax_return.
   + apply Sset.semax_set_ptr_compare_load_cast_load_backward.
-  + apply Sassign.semax_store_store_union_hack_backward.
+  + apply semax_orp.
+    - apply Sassign.semax_store_store_union_hack_backward.
+    - apply ExactStore.semax_store_exact_backward.
   + apply MinimumLogic.semax_skip.
   + rewrite <- (log_normalize.andp_dup seplog.FF).
     unfold seplog.FF at 1.
@@ -246,7 +293,22 @@ End DeepEmbeddedSoundness.
 (*                                                      *)
 (********************************************************)
 
-Module MainTheorem: MAIN_THEOREM_STATEMENT.
+Module Type FUSION_MAIN_THEOREM_STATEMENT.
+Include MAIN_THEOREM_STATEMENT.
+
+Parameter semax_store_exact :
+  forall {CS : compspecs} {Espec : OracleKind} Delta e1 e2 sh ch P,
+  writable_share sh -> access_mode (typeof e1) = By_value ch ->
+  @CSHL_Def.semax CS Espec Delta
+    (|> (tc_lvalue Delta e1 && tc_expr Delta (Ecast e2 (typeof e1)) &&
+      ((fun rho => mapsto_ sh (typeof e1) (eval_lvalue e1 rho)) * P)))
+    (Sassign e1 e2)
+    (normal_ret_assert ((fun rho => exact_mapsto sh ch
+      (force_val (sem_cast (typeof e2) (typeof e1) (eval_expr e2 rho)))
+      (eval_lvalue e1 rho)) * P)).
+End FUSION_MAIN_THEOREM_STATEMENT.
+
+Module MainTheorem: FUSION_MAIN_THEOREM_STATEMENT.
 
 Module DeepEmbedded := DeepEmbedded (VericDef) (VericMinimumSeparationLogic).
 
@@ -260,6 +322,8 @@ Module CSHL_MinimumLogic := DeepEmbeddedMinimumSeparationLogic.
 
 Module CSHL_PracticalLogic := DeepEmbeddedPracticalLogic.
 
-Module CSHL_Sound := DeepEmbeddedSoundness (VericDef) (VericMinimumSeparationLogic) (VericSound).
+Module CSHL_Sound := DeepEmbeddedSoundness (VericDef) (VericMinimumSeparationLogic) (VericSound) (VericExactStore).
+
+Definition semax_store_exact := @DeepEmbedded.semax_store_exact.
 
 End MainTheorem.
