@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "coq-vst"
-version: "2.16+fusion"
+version: "2.16-fmv1"
 synopsis: "VST with optional exact stores and reusable integer views"
 maintainer: "CCV toolchain maintainers"
 authors: ["VST team" "CCV fusion contributors"]

@@ -118,6 +118,9 @@ opam upgrade --switch=vst-fusion --skip-updates coq-vst
 
 包版本是普通依赖元数据，不是支持矩阵；历史构建的源码身份由实际 Git/opam 记录说明。
 
+带 Fusion 的版本号为 `2.16-fmv1`（`VERSION` 与 opam `version` 相同，原版为 `2.16`）。安装后可从
+`<VST 安装根>/VERSION` 区分 Fusion 与原版，从 `veric/version.v` 的 `release` / `git_rev` 读出版本与构建所用的源码提交。
+
 ## 7. 构建与回归
 
 从 VST 根目录在匹配的 opam 环境中运行：
