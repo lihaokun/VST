@@ -419,7 +419,7 @@ MSL_FILES = \
   env.v corec.v Coqlib2.v sepalg_list.v op_classes.v \
   simple_CCC.v seplog.v alg_seplog.v alg_seplog_direct.v log_normalize.v \
   ghost.v ghost_seplog.v \
-  iter_sepcon.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
+  iter_sepcon.v partial_init.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
 
 SEPCOMP_FILES = \
   Address.v \
@@ -528,7 +528,7 @@ VERIC_FILES= \
   semax_ext_oracle.v mem_lessdef.v Clight_mem_lessdef.v age_to_resource_at.v aging_lemmas.v Clight_aging_lemmas.v ghost_PCM.v mpred.v ghosts.v invariants.v
 
 ZLIST_FILES= \
-  sublist.v Zlength_solver.v list_solver.v
+  sublist.v Zlength_solver.v list_solver.v frontier.v
 
 FLOYD_FILES= \
    FusionExact.v FusionExactSem.v FusionMemvals.v FusionViews64.v FusionStore.v \
@@ -730,6 +730,12 @@ PROGS_FILES=$(PROGS32_FILES)
 endif
 
 INSTALL_FILES_SRC=$(shell COMPCERT=$(COMPCERT) COMPCERT_INST_DIR=$(COMPCERT_INST_DIR) ZLIST=$(ZLIST) BITSIZE=$(BITSIZE) ARCH=$(ARCH) IGNORECOQVERSION=$(IGNORECOQVERSION) IGNORECOMPCERTVERSION=$(IGNORECOMPCERTVERSION) MAKE=$(MAKE) util/calc_install_files '$(PROGSDIR) simpleconc')
+# 部分初始化按需导入，不依赖 proofauto 的引用闭包来保证安装。
+INSTALL_FILES_SRC += msl/partial_init.v
+# 前沿模块不自动导入 proofauto；bundled 模式仍须显式安装公开模块。
+ifeq ($(ZLIST),bundled)
+INSTALL_FILES_SRC += zlist/frontier.v
+endif
 INSTALL_FILES_VO=$(patsubst %.v,%.vo,$(INSTALL_FILES_SRC))
 INSTALL_FILES=$(sort $(INSTALL_FILES_SRC) $(INSTALL_FILES_VO))
 

@@ -277,6 +277,38 @@ Proof.
   rewrite <- Heq; apply iter_sepcon_Znth'; auto.
 Qed.
 
+(* 任意元素资源的抽出与更新恢复。
+   focus_update 抽出第 i 项资源，并给出对任意新值的更新恢复 wand；
+   put_update 只实例化已有的 wand（modus ponens），不负责生产 wand。 *)
+Lemma iter_sepcon_focus_update {dX : Inhabitant B} : forall (F : B -> A) (xs : list B) (i : Z),
+  (0 <= i < Zlength xs)%Z ->
+  iter_sepcon F xs |--
+    F (Znth i xs) *
+    (ALL x', F x' -* iter_sepcon F (upd_Znth i xs x')).
+Proof.
+  intros F xs i Hi.
+  rewrite (iter_sepcon_Znth F xs i Hi).
+  apply sepcon_derives; [apply derives_refl |].
+  apply allp_right. intros x'.
+  apply wand_sepcon_adjoint.
+  rewrite (iter_sepcon_Znth F (upd_Znth i xs x') i) by (rewrite (upd_Znth_Zlength i xs x'); lia).
+  rewrite (remove_upd_Znth i xs x' Hi), (upd_Znth_same i xs x' Hi).
+  rewrite (sepcon_comm (iter_sepcon F (remove_Znth i xs)) (F x')).
+  apply derives_refl.
+Qed.
+
+Lemma iter_sepcon_put_update : forall (F : B -> A) (xs : list B) (i : Z) (x : B),
+  F x * (ALL x', F x' -* iter_sepcon F (upd_Znth i xs x')) |--
+  iter_sepcon F (upd_Znth i xs x).
+Proof.
+  intros F xs i x.
+  eapply derives_trans with (Q := F x * (F x -* iter_sepcon F (upd_Znth i xs x))).
+  - apply sepcon_derives; [apply derives_refl |].
+    eapply allp_left. apply derives_refl.
+  - rewrite (sepcon_comm (F x) (F x -* iter_sepcon F (upd_Znth i xs x))).
+    apply wand_sepcon_adjoint. apply derives_refl.
+Qed.
+
 End IterSepCon.
 
 Lemma iter_sepcon_map: forall {A B C: Type} {ND : NatDed A} {SL : SepLog A} (l : list C) (f : B -> A) (g: C -> B),
@@ -367,6 +399,46 @@ Proof.
     rewrite H1, H2, combine_eq; unfold uncurry. cbn [fst snd].
     apply prop_and_same_derives. apply prop_right. auto.
 all:    apply derives_refl.  (*  We need this for Coq 8.14 and before. *)
+Qed.
+
+(* 双列表版本：固定槽描述（第一张表）不变，只更新第 i 个值。
+   focus_update 同时借出第 i 槽与第 i 值，余部为两张表删除第 i 项后的配对 fold；
+   put_update 同样只消费已有 wand。 *)
+Lemma iter_sepcon2_focus_update {dS : Inhabitant B1} {dX : Inhabitant B2} :
+  forall (slots : list B1) (xs : list B2) (i : Z),
+  (Zlength slots = Zlength xs)%Z -> (0 <= i < Zlength slots)%Z ->
+  iter_sepcon2 slots xs |--
+    p (Znth i slots) (Znth i xs) *
+    (ALL x', p (Znth i slots) x' -* iter_sepcon2 slots (upd_Znth i xs x')).
+Proof.
+  intros slots xs i Hlen Hi.
+  rewrite (iter_sepcon2_Znth slots xs (i := i) Hi Hlen).
+  apply sepcon_derives; [apply derives_refl |].
+  apply allp_right. intros x'.
+  apply wand_sepcon_adjoint.
+  rewrite (iter_sepcon2_Znth slots (upd_Znth i xs x') (i := i))
+    by first [exact Hi | rewrite (upd_Znth_Zlength i xs x'); lia].
+  rewrite (upd_Znth_same i xs x') by lia.
+  rewrite (remove_upd_Znth i xs x') by lia.
+  rewrite (sepcon_comm (iter_sepcon2 (remove_Znth i slots) (remove_Znth i xs))
+                       (p (Znth i slots) x')).
+  apply derives_refl.
+Qed.
+
+Lemma iter_sepcon2_put_update {dS : Inhabitant B1} :
+  forall (slots : list B1) (xs : list B2) (i : Z) (x : B2),
+  p (Znth i slots) x *
+    (ALL x', p (Znth i slots) x' -* iter_sepcon2 slots (upd_Znth i xs x')) |--
+  iter_sepcon2 slots (upd_Znth i xs x).
+Proof.
+  intros slots xs i x.
+  eapply derives_trans with
+    (Q := p (Znth i slots) x * (p (Znth i slots) x -* iter_sepcon2 slots (upd_Znth i xs x))).
+  - apply sepcon_derives; [apply derives_refl |].
+    eapply allp_left. apply derives_refl.
+  - rewrite (sepcon_comm (p (Znth i slots) x)
+                         (p (Znth i slots) x -* iter_sepcon2 slots (upd_Znth i xs x))).
+    apply wand_sepcon_adjoint. apply derives_refl.
 Qed.
 
 End IterSepCon2.
