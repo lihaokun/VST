@@ -528,7 +528,7 @@ VERIC_FILES= \
   semax_ext_oracle.v mem_lessdef.v Clight_mem_lessdef.v age_to_resource_at.v aging_lemmas.v Clight_aging_lemmas.v ghost_PCM.v mpred.v ghosts.v invariants.v
 
 ZLIST_FILES= \
-  sublist.v Zlength_solver.v list_solver.v frontier.v frontier_bridge.v
+  sublist.v Zlength_solver.v list_solver.v frontier.v
 
 FLOYD_FILES= \
    FusionExact.v FusionExactSem.v FusionMemvals.v FusionViews64.v FusionStore.v \
@@ -733,11 +733,12 @@ INSTALL_FILES_SRC=$(shell COMPCERT=$(COMPCERT) COMPCERT_INST_DIR=$(COMPCERT_INST
 # 部分初始化按需导入，不依赖 proofauto 的引用闭包来保证安装。
 INSTALL_FILES_SRC += msl/partial_init.v
 INSTALL_FILES_SRC += msl/iter_sepcon_indexed.v
+INSTALL_FILES_SRC += msl/partial_init_bridge.v
 # 整数列表规范化按需导入，不进 proofauto 自动闭包。
 INSTALL_FILES_SRC += floyd/integer_list.v
 # 前沿模块不自动导入 proofauto；bundled 模式仍须显式安装公开模块。
 ifeq ($(ZLIST),bundled)
-INSTALL_FILES_SRC += zlist/frontier.v zlist/frontier_bridge.v
+INSTALL_FILES_SRC += zlist/frontier.v
 endif
 INSTALL_FILES_VO=$(patsubst %.v,%.vo,$(INSTALL_FILES_SRC))
 INSTALL_FILES=$(sort $(INSTALL_FILES_SRC) $(INSTALL_FILES_VO))
