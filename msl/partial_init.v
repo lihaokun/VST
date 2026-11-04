@@ -18,6 +18,7 @@ Require Import VST.msl.simple_CCC.
 Require Import VST.msl.seplog.
 Require Import VST.msl.log_normalize.
 Require Import VST.msl.iter_sepcon.
+Require Import VST.msl.iter_sepcon_indexed.
 Require Import VST.zlist.sublist.
 Require Import VST.zlist.frontier.
 Require Import Stdlib.Lists.List.
@@ -148,7 +149,8 @@ Section PartialInit.
         * apply IH.
   Qed.
 
-  (* 等长两表上的配对 fold 展开为 upto 上的位置 fold。 *)
+  (* 等长两表上的配对 fold 展开为 upto 上的位置 fold。
+     证明体已迁至 msl/iter_sepcon_indexed.v；此处保留原全限定名的薄别名。 *)
   Lemma iter_sepcon2_upto_eq {W : Type} {dS : Inhabitant S} {dW : Inhabitant W} :
     forall (p : S -> W -> L) (l1 : list S) (l2 : list W),
       Zlength l1 = Zlength l2 ->
@@ -157,35 +159,7 @@ Section PartialInit.
                   (upto (Z.to_nat (Zlength l1))).
   Proof.
     intros p l1 l2 Hlen.
-    revert l2 Hlen.
-    induction l1 as [|a l1 IH]; intros l2 Hlen.
-    - destruct l2 as [|b l2].
-      + reflexivity.
-      + replace (Zlength (@nil S)) with 0%Z in Hlen by reflexivity.
-        rewrite Zlength_cons in Hlen. exfalso.
-        pose proof (Zlength_nonneg l2). lia.
-    - destruct l2 as [|b l2].
-      + replace (Zlength (@nil W)) with 0%Z in Hlen by reflexivity.
-        rewrite Zlength_cons in Hlen. exfalso.
-        pose proof (Zlength_nonneg l1). lia.
-      + rewrite !Zlength_cons in Hlen.
-        assert (Heq : Zlength l1 = Zlength l2) by lia.
-        cbn [iter_sepcon2].
-        rewrite Zlength_cons.
-        rewrite Z2Nat.inj_succ by apply Zlength_nonneg.
-        cbn [upto iter_sepcon].
-        rewrite <- iter_sepcon_map.
-        rewrite !Znth_0_cons.
-        f_equal.
-        rewrite (IH l2 Heq).
-        apply iter_sepcon_func_strong.
-        intros x Hin.
-        rewrite In_upto in Hin.
-        destruct Hin as [Hx0 _].
-        replace (Z.succ x) with (x + 1)%Z by apply Z.add_1_r.
-        rewrite !Znth_pos_cons by lia.
-        replace ((x + 1) - 1)%Z with x by lia.
-        reflexivity.
+    exact (iter_sepcon_indexed.iter_sepcon2_upto_eq p l1 l2 Hlen).
   Qed.
 
   (* ================= 公开引理 ================= *)

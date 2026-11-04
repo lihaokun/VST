@@ -419,7 +419,7 @@ MSL_FILES = \
   env.v corec.v Coqlib2.v sepalg_list.v op_classes.v \
   simple_CCC.v seplog.v alg_seplog.v alg_seplog_direct.v log_normalize.v \
   ghost.v ghost_seplog.v \
-  iter_sepcon.v partial_init.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
+  iter_sepcon.v partial_init.v iter_sepcon_indexed.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
 
 SEPCOMP_FILES = \
   Address.v \
@@ -528,12 +528,12 @@ VERIC_FILES= \
   semax_ext_oracle.v mem_lessdef.v Clight_mem_lessdef.v age_to_resource_at.v aging_lemmas.v Clight_aging_lemmas.v ghost_PCM.v mpred.v ghosts.v invariants.v
 
 ZLIST_FILES= \
-  sublist.v Zlength_solver.v list_solver.v frontier.v
+  sublist.v Zlength_solver.v list_solver.v frontier.v frontier_bridge.v
 
 FLOYD_FILES= \
    FusionExact.v FusionExactSem.v FusionMemvals.v FusionViews64.v FusionStore.v \
    coqlib3.v base.v seplog_tactics.v typecheck_lemmas.v val_lemmas.v assert_lemmas.v find_nth_tactic.v const_only_eval.v \
-   base2.v functional_base.v go_lower.v \
+   base2.v functional_base.v go_lower.v integer_list.v \
    library.v proofauto.v computable_theorems.v computable_functions.v \
    type_induction.v align_compatible_dec.v reptype_lemmas.v aggregate_type.v aggregate_pred.v \
    nested_pred_lemmas.v compact_prod_sum.v \
@@ -732,9 +732,12 @@ endif
 INSTALL_FILES_SRC=$(shell COMPCERT=$(COMPCERT) COMPCERT_INST_DIR=$(COMPCERT_INST_DIR) ZLIST=$(ZLIST) BITSIZE=$(BITSIZE) ARCH=$(ARCH) IGNORECOQVERSION=$(IGNORECOQVERSION) IGNORECOMPCERTVERSION=$(IGNORECOMPCERTVERSION) MAKE=$(MAKE) util/calc_install_files '$(PROGSDIR) simpleconc')
 # 部分初始化按需导入，不依赖 proofauto 的引用闭包来保证安装。
 INSTALL_FILES_SRC += msl/partial_init.v
+INSTALL_FILES_SRC += msl/iter_sepcon_indexed.v
+# 整数列表规范化按需导入，不进 proofauto 自动闭包。
+INSTALL_FILES_SRC += floyd/integer_list.v
 # 前沿模块不自动导入 proofauto；bundled 模式仍须显式安装公开模块。
 ifeq ($(ZLIST),bundled)
-INSTALL_FILES_SRC += zlist/frontier.v
+INSTALL_FILES_SRC += zlist/frontier.v zlist/frontier_bridge.v
 endif
 INSTALL_FILES_VO=$(patsubst %.v,%.vo,$(INSTALL_FILES_SRC))
 INSTALL_FILES=$(sort $(INSTALL_FILES_SRC) $(INSTALL_FILES_VO))
