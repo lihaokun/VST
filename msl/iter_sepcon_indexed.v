@@ -1,21 +1,10 @@
-(* M2：槽位 indexed 表示的共享底座（msl/iter_sepcon_indexed.v）
-
-   设计与准入：PLAYBOOK_SLOT_BRIDGE_DESIGN.md（v2，已批）。内容五件：
-   1) iter_sepcon2_upto_eq —— 自 msl/partial_init.v（Section PartialInit）原样迁入，
-      陈述与证明体逐字保留。partial_init.v 由框架集成改为全限定薄别名（别名甲），
-      ContractM3.v:86 的 `Print Assumptions partial_init.iter_sepcon2_upto_eq`
-      全名引用保持可解析且指同一事实。
-   2) indexed_slots / indexed_slots_length / Znth_indexed_slots —— 派生表
-      （map-of-upto，对原 slots 零前提、全输入 total）及其长度/读取事实。
-   3) iter_sepcon2_indexed_slots_eq —— indexed↔双列表组合桥
-      （无独立 0<=n 前提：Zlength xs = n 经 Zlength_nonneg 已蕴含）。
-   4) iter_sepcon_focus_indexed —— 库级 indexed 形 focus 入口（消费者形态），
-      陈述直接落在 upto fold 上：借出第 i 槽 + 对任意新值的恢复 wand。
-      证明与归档 write-focus 模板（polys_focus_upd 同构）逐 tactic 对应，
-      p / slots 泛化，不含任何项目特定谓词。
-
-   逻辑上下文同既有 M2 API 族：等式桥 {L}{ND}{SL}；focus 入口的 wand 类
-   另需 {ClS}{CoSL}——零新 class；Inhabitant {dS}{dX}。 *)
+(* 槽位 indexed 表示的共享底座。
+   iter_sepcon_focus_indexed 直接处理 upto fold：借出第 i 槽并保留任意新值的恢复条件。
+   使用方展开原 rep 后实例化元素资源函数即可，不必自行转换成双列表或改写 wand 的尾部。
+   indexed_slots、长度/读取事实以及两条等式桥也公开，供非标准使用形态组合。
+   原槽位表长度不受额外约束；值表长度与枚举槽数的关系按各入口前提提供。
+   iter_sepcon2_upto_eq 仅需 NatDed/SepLog；当前组合桥与 focus 的显式签名还带
+   ClassicalSep/CorableSepLog，使用时以实际类型为准。partial_init 保留原同名薄别名。 *)
 
 Set Default Timeout 300.
 

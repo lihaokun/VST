@@ -419,7 +419,7 @@ MSL_FILES = \
   env.v corec.v Coqlib2.v sepalg_list.v op_classes.v \
   simple_CCC.v seplog.v alg_seplog.v alg_seplog_direct.v log_normalize.v \
   ghost.v ghost_seplog.v \
-  iter_sepcon.v partial_init.v iter_sepcon_indexed.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
+  iter_sepcon.v iter_sepcon_indexed.v partial_init.v partial_init_bridge.v ramification_lemmas.v wand_frame.v wandQ_frame.v #age_to.v
 
 SEPCOMP_FILES = \
   Address.v \

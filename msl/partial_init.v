@@ -1,7 +1,7 @@
-(* M3：部分初始化（msl/partial_init.v）
+(* 部分初始化聚合（msl/partial_init.v）
    提供公开定义 partial_cell / partial_init / partial_resume 与九条公开引理：
    partial_init_empty / full / overfull / focus / restore / put / forget / indexed / fixed。
-   逻辑上下文同 M2（NatDed + SepLog + ClassicalSep + CorableSepLog，载体 L）。
+   逻辑载体 L 参数化，使用既有 NatDed / SepLog / ClassicalSep / CorableSepLog。
 
    定义不要求值类型 V 的默认值：None 状态在证明内使用显式 option 默认
    （Inhabitant (option V) 由 zlist 的全局实例给 None）；读槽位的接口带 {dS : Inhabitant S}。
@@ -27,7 +27,7 @@ Import ListNotations.
 
 Local Open Scope logic.
 
-(* ================= 内部辅助：filled 表的读取 ================= *)
+(* ================= 可复用辅助：filled 表的读取 ================= *)
 
 (* 表的前缀段逐位读原前缀。 *)
 Lemma filled_Znth_lt {A} {dA : Inhabitant A} :
@@ -86,7 +86,7 @@ Section PartialInit.
     (ALL v : V, E (Znth (Zlength done) slots) v -*
             partial_init U E slots (done ++ [v])).
 
-  (* ================= 内部辅助：配对 fold 的四种展开 ================= *)
+  (* ================= 可复用辅助：配对 fold 的四种展开 ================= *)
 
   (* 正长度 Zrepeat 可拆出头部。 *)
   Lemma Zrepeat_cons_S {W : Type} :

@@ -1,22 +1,11 @@
-(* msl/partial_init_bridge.v — 第3组：playbook 部分填充接口（plem-2 §6/§2）。 *)
-(* 依赖底座 msl/iter_sepcon_indexed.v（indexed_slots / indexed_slots_length / Znth_indexed_slots /
-   iter_sepcon2_upto_eq 迁移 / iter_sepcon2_indexed_slots_eq，第2组）尚未发布。
-   本文件当前内容 = Section 泛型上下文 + indexed_rep 定义 + 三条不依赖底座的公开引理
-   （rep_0 / rep_weaken / rep_full，现成库 iter_sepcon_func_strong / iter_sepcon_derives 直证，零 setoid）。
-   底座发布后追加（签名已按 docs/design/playbook-lemma-extraction/
-   playbook-bridges-detailed-design.md §6 冻结，RHS 槽表一律使用底座的 indexed_slots，本文件不复制定义）：
-     Lemma rep_eq_partial_init : 0 <= j <= n -> Zlength contents = j ->
-       indexed_rep Elem U slots contents j n =
-       partial_init U (fun p w => Elem p w) (indexed_slots slots n) contents.
-     Lemma rep_focus : 0 <= j < n -> Zlength contents = j ->
-       indexed_rep Elem U slots contents j n |--
-       U (Znth j slots) * (ALL w, Elem (Znth j slots) w -*
-         indexed_rep Elem U slots (contents ++ [w]) (j+1) n).
-     Lemma rep_focus2 : 0 <= j < n -> Zlength contents = j ->
-       indexed_rep Elem U slots contents j n |--
-       U (Znth j slots) * ((U (Znth j slots) -* indexed_rep Elem U slots contents j n) &&
-         (ALL w, Elem (Znth j slots) w -* indexed_rep Elem U slots (contents ++ [w]) (j+1) n)).
-   不新增全局 Inhabitant / hint / 公理；载体泛型 L，逻辑上下文同 M3。 *)
+(* 部分填充的 indexed 表示与直接使用入口。
+   indexed_rep 保留显式的前沿 j、槽数 n 与原槽位表，不要求原槽位表长为 n。
+   原 rep 展开为同形表达式后，可直接实例化 rep_focus（成功恢复条件）或
+   rep_focus2（成功/失败两个恢复条件，以 && 共享余部），无需在使用方展开 partial_init。
+   rep_0 / rep_full 不增加长度前提；rep_weaken 只要求逐槽 Elem |-- U。
+   rep_eq_partial_init 公开模型等式，供确实需要切换表示的证明使用；其派生槽表
+   由 iter_sepcon_indexed 提供。不能把域外 indexed_rep 与内部 FF 语义混同。
+   辅助引理可通过模块限定名复用；不注册全局默认值实例或 hint。 *)
 Set Default Timeout 300.
 
 Require Import VST.msl.base.
@@ -36,8 +25,7 @@ From Stdlib Require Import Lia.
 Import ListNotations.
 Local Open Scope logic.
 
-(* 内部辅助：mpred 等式转 derives（subst 路线；用于 eq goal 下的 f_equal 链，
-   避免 wand 深层的 setoid 依赖）。与归档 glue 同功能，接口冻结后统一归名。 *)
+(* 泛型资源等式转 derives；使用 subst 避免在 wand 深层依赖 setoid 实例。 *)
 Lemma eq_to_derives {A : Type} {ND0 : NatDed A} (PQ0 RQ0 : A) : PQ0 = RQ0 -> PQ0 |-- RQ0.
 Proof. intros H. subst RQ0. apply derives_refl. Qed.
 

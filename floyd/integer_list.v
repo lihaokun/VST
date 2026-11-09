@@ -1,11 +1,11 @@
-(* M4/C05：整数列表规范化（细化设计 §7）。
+(* 整数列表的机器表示规范化与存在性重建。
    命名空间 [IntegerList]，公开四套实际定义（s32/u32/s64/u64），
    每套 4 定义 6 引理：norm_m/encode_m/values_m/range_m 与
    norm_m_repr/norm_m_length/norm_m_range/norm_m_values/recover_m/rebuild_m。
    轻量导入：functional_base（已导出 VST.zlist.sublist）；不导入 proofauto。
-   norm_* 只做机器表示规范化，不保证输入输出 Z 相等（B11）；
-   recover_* 只接受 Vint/Vlong 形状的列表，拒绝 Vundef/Vptr/其余构造（B12）。
-   rebuild_m 是 playbook §H2.4 推荐的存在性规范化库入口（witness = norm_m lo，
+   norm_* 只做机器表示规范化，不保证输入输出 Z 相等；
+   recover_* 只接受 Vint/Vlong 形状的列表，拒绝 Vundef/Vptr/其余构造。
+   rebuild_m 是调用后规范化的存在性入口（witness = norm_m lo，
    调用形态 destruct (rebuild_m lo) as [lo' […]]; replace 编码表）；纯由上方
    公开引理组装，无新数学。restore（裸 val 列表折回消费方抽象 rep，
    data_at … ⊢ EX fv, <抽象 rep> sh fv p）依赖消费方自己的 Rep 定义：
@@ -94,7 +94,7 @@ Proof.
       apply Forall_cons; [apply Int.signed_range | exact Hrange].
 Qed.
 
-(* 存在性规范化 rebuild（playbook §H2.4 调用后规范化入口）：与 lo 编码相等、
+(* 调用后规范化的存在性入口：与 lo 编码相等、
    长度相等、逐项入界的 lo' 存在；witness 即 norm_s32（= playbook witness）。 *)
 Lemma rebuild_s32 : forall lo : list Z,
   exists lo' : list Z,
@@ -174,7 +174,7 @@ Proof.
       * exact Hrange.
 Qed.
 
-(* 存在性规范化 rebuild（playbook §H2.4）：witness = norm_u32。 *)
+(* 存在性规范化：witness = norm_u32。 *)
 Lemma rebuild_u32 : forall lo : list Z,
   exists lo' : list Z,
     encode_u32 lo' = encode_u32 lo /\
@@ -251,7 +251,7 @@ Proof.
       apply Forall_cons; [apply Int64.signed_range | exact Hrange].
 Qed.
 
-(* 存在性规范化 rebuild（playbook §H2.4）：witness = norm_s64。 *)
+(* 存在性规范化：witness = norm_s64。 *)
 Lemma rebuild_s64 : forall lo : list Z,
   exists lo' : list Z,
     encode_s64 lo' = encode_s64 lo /\
@@ -330,7 +330,7 @@ Proof.
       * exact Hrange.
 Qed.
 
-(* 存在性规范化 rebuild（playbook §H2.4）：witness = norm_u64。 *)
+(* 存在性规范化：witness = norm_u64。 *)
 Lemma rebuild_u64 : forall lo : list Z,
   exists lo' : list Z,
     encode_u64 lo' = encode_u64 lo /\
