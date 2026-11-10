@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "dev"
+version: "2.13-playbook"
 synopsis: "A list library indexed by Z type, with a powerful automatic solver"
 authors: [
   "Qinshi Wang"

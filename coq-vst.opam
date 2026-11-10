@@ -15,7 +15,7 @@ depends: [
   "coq-stdlib" {= "9.0.0"}
   "coq-compcert" {= "3.17"}
   "coq-flocq" {= "4.2.2"}
-  "coq-vst-zlist" {= "2.13"}
+  "coq-vst-zlist" {= "2.13-playbook"}
 ]
 build: [
   [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
