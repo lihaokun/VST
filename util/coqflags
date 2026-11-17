@@ -38,4 +38,17 @@ do
 done    
     
 
-echo $FLAGS -R $VST/compcert compcert
+# Make supplies the selected external mappings. Standalone use reads the
+# generated project, so it cannot silently select bundled CompCert.
+if [ "${VST_EXTERNAL_FLAGS+x}" != x ]; then
+    if [ ! -f _CoqProject-export ]; then
+        echo 'Run make _CoqProject-export with the selected configuration first' >&2
+        exit 1
+    fi
+    cat _CoqProject-export
+    for D in "$@"; do
+        echo "-Q $VST/$D VST.$D"
+    done
+else
+    echo "$FLAGS $VST_EXTERNAL_FLAGS"
+fi

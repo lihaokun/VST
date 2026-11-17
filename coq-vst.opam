@@ -13,16 +13,21 @@ depends: [
   "coq" {= "9.0.0"}
   "coq-core" {= "9.0.0"}
   "coq-stdlib" {= "9.0.0"}
-  "coq-compcert" {= "3.17"}
-  "coq-flocq" {= "4.2.2"}
+  "conf-python-3"
   "coq-vst-zlist" {= "2.13"}
 ]
 build: [
-  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
+  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
 ]
 install: [
-  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
+  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
 ]
 run-test: [
-  [make "-j%{jobs}%" "test-fusion" "COMPCERT=platform" "ZLIST=platform" "BITSIZE=64"]
+  [make "-j%{jobs}%" "test-fusion" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
 ]
+description: """
+This fork consumes a separately exported ClightForge semantics component.
+Export SEMANTICS_DIR=/absolute/component before invoking opam (including install).
+The component supplies both compcert and Flocq; it is not an official CompCert
+package. See BUILD_ORGANIZATION.md for export and verification commands.
+"""

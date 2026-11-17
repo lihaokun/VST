@@ -36,7 +36,8 @@ endif
 # on the make command line
 #
 # # Choosing compcert #
-# COMPCERT=platform     (default, choose 32 or 64 bit platform supplied x86 variant, dependent on BITSIZE, ARCH can be left empty or must be x86)
+# COMPCERT=semantics    (default, consume ClightForge export at SEMANTICS_DIR)
+# COMPCERT=platform     (legacy: choose 32 or 64 bit platform supplied x86 variant, dependent on BITSIZE, ARCH can be left empty or must be x86)
 # COMPCERT=bundled      (build and use bundled 32 or 64 x86 variant, dependent on BITSIZE, ARCH can be left empty or must be x86)
 # COMPCERT=bundled_new  (build and use bundled compcert_new 32 or 64 x86 variant, dependent on BITSIZE, ARCH can be left empty or must be x86)
 # COMPCERT=src_dir      (build and use in source folder COMPCERT_SRC_DIR the variant specified by ARCH and BITSIZE)
@@ -65,7 +66,8 @@ endif
 # CLIGHTGEN=$(my_local_bin_path)/clightgen
 
 # # User settable variables #
-COMPCERT ?= platform
+COMPCERT ?= semantics
+SEMANTICS_DIR ?=
 ZLIST ?= bundled
 ARCH ?= 
 BITSIZE ?=
@@ -80,7 +82,24 @@ COMPCERT_EXPLICIT_PATH = true
 # Set to true if building from sources
 COMPCERT_BUILD_FROM_SRC = false
 
-ifeq ($(COMPCERT),platform)
+ifeq ($(COMPCERT),semantics)
+  ifeq ($(SEMANTICS_DIR),)
+    $(error Set SEMANTICS_DIR to a ClightForge semantics-export directory; see BUILD_ORGANIZATION.md)
+  endif
+  override SEMANTICS_DIR := $(abspath $(SEMANTICS_DIR))
+  SEMANTICS_CONFIG := $(shell python3 util/semantics-config.py "$(SEMANTICS_DIR)")
+  ifeq ($(SEMANTICS_CONFIG),)
+    $(error Cannot consume selected ClightForge semantics component)
+  endif
+  COMPCERT_VERSION := $(word 1,$(SEMANTICS_CONFIG))
+  COMPCERT_ARCH := $(word 2,$(SEMANTICS_CONFIG))
+  COMPCERT_BITSIZE := $(word 3,$(SEMANTICS_CONFIG))
+  COMPCERT_SRC_DIR = __NONE__
+  COMPCERT_INST_DIR = $(SEMANTICS_DIR)/compcert
+  COMPCERT_INFO_PATH_REF =
+  COMPCERT_CONFIG = $(SEMANTICS_DIR)/semantics.json
+  override FLOCQ = -R $(SEMANTICS_DIR)/Flocq Flocq
+else ifeq ($(COMPCERT),platform)
   # Platform supplied CompCert
   ifeq ($(BITSIZE),)
     COMPCERT_INST_DIR = $(COQLIB)/user-contrib/compcert
@@ -123,6 +142,7 @@ endif
 
 # Verify that the version of the supplied compcert matches the version of the internal compcert
 
+ifneq ($(COMPCERT),semantics)
 CV1=$(shell cat $(COMPCERT_INFO_PATH_REF)/VERSION | grep "version=")
 CV2=$(shell cat $(COMPCERT_INST_DIR)/VERSION | grep "version=")
 
@@ -151,11 +171,13 @@ ifdef CLIGHTGEN
   endif
 endif
 
+endif
+
 # Verify that the supplied compcert folder is built (contains .vo files)
 
 ifeq ($(COMPCERT_BUILD_FROM_SRC),false)
   ifeq ($(wildcard $(COMPCERT_INST_DIR)/*/Clight.vo), )
-    $(error FIRST BUILD COMPCERT, by:  cd $(COMPCERT_INST_DIR); $(MAKE) clightgen)
+    $(error Missing Clight.vo in $(COMPCERT_INST_DIR); supply a fully compiled semantics base)
   endif
 endif
 
@@ -176,11 +198,13 @@ else
   # We are using a pre-built CompCert, so verify that BITSIZE and ARCH match
   # or extract them from the compcert settings if they are undefined
 
+  ifneq ($(COMPCERT),semantics)
   ifeq ($(wildcard $(COMPCERT_INST_DIR)/compcert.config),)
     $(error Cannot find compcert.config in $(COMPCERT_INST_DIR))
   endif
   
   include $(COMPCERT_INST_DIR)/compcert.config
+  endif
 
   ifneq ($(BITSIZE),)
     ifneq ($(BITSIZE),$(COMPCERT_BITSIZE))
@@ -287,7 +311,10 @@ DIRS = $(VSTDIRS) $(OTHERDIRS)
 
 COMPCERTDIRS=lib common $(ARCHDIRS) cfrontend export $(BACKEND)
 
-ifeq ($(COMPCERT_EXPLICIT_PATH),true)
+ifeq ($(COMPCERT),semantics)
+  COMPCERT_R_FLAGS= -R $(SEMANTICS_DIR)/compcert compcert $(FLOCQ)
+  EXTFLAGS= $(COMPCERT_R_FLAGS)
+else ifeq ($(COMPCERT_EXPLICIT_PATH),true)
   COMPCERT_R_FLAGS= $(foreach d, $(COMPCERTDIRS), -R $(COMPCERT_INST_DIR)/$(d) compcert.$(d)) $(FLOCQ)
   EXTFLAGS= $(foreach d, $(COMPCERTDIRS), -Q $(COMPCERT_INST_DIR)/$(d) compcert.$(d)) $(FLOCQ)
 else
@@ -697,9 +724,11 @@ FILES = \
 
 EXTRA_INSTALL_FILES = \
   LICENSE \
+  BUILD_ORGANIZATION.md \
   HISTORY \
   CHANGES \
   README.md \
+  doc/clightforge-build.md \
   doc/fusion.md \
   VERSION \
   msl/CREDITS \
@@ -729,11 +758,19 @@ else
 PROGS_FILES=$(PROGS32_FILES)
 endif
 
-INSTALL_FILES_SRC=$(shell COMPCERT=$(COMPCERT) COMPCERT_INST_DIR=$(COMPCERT_INST_DIR) ZLIST=$(ZLIST) BITSIZE=$(BITSIZE) ARCH=$(ARCH) IGNORECOQVERSION=$(IGNORECOQVERSION) IGNORECOMPCERTVERSION=$(IGNORECOMPCERTVERSION) MAKE=$(MAKE) util/calc_install_files '$(PROGSDIR) simpleconc')
+export SEMANTICS_DIR COMPCERT ZLIST BITSIZE ARCH COQBIN COQEXTRAFLAGS
+INSTALL_ENV=SEMANTICS_DIR='$(SEMANTICS_DIR)' COMPCERT='$(COMPCERT)' COMPCERT_INST_DIR='$(COMPCERT_INST_DIR)' COMPCERT_SRC_DIR='$(COMPCERT_SRC_DIR)' ZLIST='$(ZLIST)' BITSIZE='$(BITSIZE)' ARCH='$(ARCH)' COQBIN='$(COQBIN)' COQEXTRAFLAGS='$(COQEXTRAFLAGS)' IGNORECOQVERSION='$(IGNORECOQVERSION)' IGNORECOMPCERTVERSION='$(IGNORECOMPCERTVERSION)' MAKE='$(MAKE)'
+INSTALL_FILES_SRC=$(shell $(INSTALL_ENV) util/calc_install_files '$(PROGSDIR) simpleconc' || echo INSTALL_ENUMERATION_FAILED)
+ifneq ($(filter install,$(MAKECMDGOALS)),)
+  INSTALL_FILES_SRC := $(INSTALL_FILES_SRC)
+  ifneq ($(filter INSTALL_ENUMERATION_FAILED,$(INSTALL_FILES_SRC)),)
+    $(error Failed to enumerate installation files)
+  endif
+endif
 INSTALL_FILES_VO=$(patsubst %.v,%.vo,$(INSTALL_FILES_SRC))
 INSTALL_FILES=$(sort $(INSTALL_FILES_SRC) $(INSTALL_FILES_VO))
 
-IRIS_INSTALL_FILES_BASE=$(shell COMPCERT=$(COMPCERT) COMPCERT_INST_DIR=$(COMPCERT_INST_DIR) ZLIST=$(ZLIST) BITSIZE=$(BITSIZE) ARCH=$(ARCH) IGNORECOQVERSION=$(IGNORECOQVERSION) IGNORECOMPCERTVERSION=$(IGNORECOMPCERTVERSION) MAKE=$(MAKE) util/calc_install_files atomics)
+IRIS_INSTALL_FILES_BASE=$(shell $(INSTALL_ENV) util/calc_install_files atomics)
 IRIS_INSTALL_FILES_SRC=$(filter-out $(INSTALL_FILES_SRC),$(IRIS_INSTALL_FILES_BASE))
 IRIS_INSTALL_FILES_VO=$(patsubst %.v,%.vo,$(IRIS_INSTALL_FILES_SRC))
 IRIS_INSTALL_FILES=$(sort $(IRIS_INSTALL_FILES_SRC) $(IRIS_INSTALL_FILES_VO))
@@ -844,7 +881,9 @@ mailbox: _CoqProject mailbox/verif_mailbox_all.vo
 atomics: _CoqProject atomics/verif_hashtable_atomic.vo $(PROGSDIR)/verif_incr_atomic.vo atomics/verif_lock.vo atomics/verif_lock_atomic.vo
 io: _CoqProject $(PROGSDIR)/os_combine.vo $(PROGSDIR)/verif_printf.vo $(PROGSDIR)/verif_io.vo $(PROGSDIR)/verif_io_mem.vo $(PROGSDIR)/io_specs.vo floyd/printf.vo
 
+ifneq ($(COMPCERT),semantics)
 $(CVOFILES): compcert
+endif
 
 cvfiles: $(CVFILES)
 
@@ -856,6 +895,7 @@ VST.config:
 	echo "VST_BITSIZE=$(BITSIZE)"; \
 	echo "VST_COMPCERT=$(COMPCERT)"; \
 	echo "VST_COMPCERT_INST_DIR=$(COMPCERT_INST_DIR)"; \
+	echo "VST_SEMANTICS_DIR=$(SEMANTICS_DIR)"; \
 	echo "VST_COMPCERT_EXPLICIT_PATH=$(COMPCERT_EXPLICIT_PATH)"; \
 	echo "VST_INSTALLDIR=$(INSTALLDIR)"; \
 	) > VST.config
@@ -933,9 +973,9 @@ endif
 veric/version.v:  VERSION $(MSL_FILES:%=msl/%) $(SEPCOMP_FILES:%=sepcomp/%) $(VERIC_FILES:%=veric/%) $(FLOYD_FILES:%=floyd/%)
 	util/make_version ${BITSIZE} ${COMPCERT_VERSION}
 
-_CoqProject _CoqProject-export: Makefile util/coqflags $(COMPCERT_CONFIG)
+_CoqProject _CoqProject-export &: Makefile util/coqflags $(COMPCERT_CONFIG)
 	echo $(COQFLAGS) > _CoqProject
-	util/coqflags > _CoqProject-export
+	VST_EXTERNAL_FLAGS='$(EXTFLAGS)' util/coqflags $(if $(filter bundled,$(ZLIST)),zlist) concurrency > _CoqProject-export
 
 floyd/floyd.coq: floyd/proofauto.vo
 	coqtop $(COQFLAGS) -load-vernac-object floyd/proofauto -outputstate floyd/floyd -batch
