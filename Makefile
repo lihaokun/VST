@@ -87,7 +87,9 @@ ifeq ($(COMPCERT),semantics)
     $(error Set SEMANTICS_DIR to a ClightForge semantics-export directory; see BUILD_ORGANIZATION.md)
   endif
   override SEMANTICS_DIR := $(abspath $(SEMANTICS_DIR))
-  SEMANTICS_CONFIG := $(shell python3 util/semantics-config.py "$(SEMANTICS_DIR)")
+  SEMANTICS_MANIFEST ?= $(SEMANTICS_DIR)/semantics.json
+  export SEMANTICS_MANIFEST
+  SEMANTICS_CONFIG := $(shell python3 util/semantics-config.py "$(SEMANTICS_DIR)" "$(SEMANTICS_MANIFEST)")
   ifeq ($(SEMANTICS_CONFIG),)
     $(error Cannot consume selected ClightForge semantics component)
   endif
@@ -97,7 +99,7 @@ ifeq ($(COMPCERT),semantics)
   COMPCERT_SRC_DIR = __NONE__
   COMPCERT_INST_DIR = $(SEMANTICS_DIR)/compcert
   COMPCERT_INFO_PATH_REF =
-  COMPCERT_CONFIG = $(SEMANTICS_DIR)/semantics.json
+  COMPCERT_CONFIG = $(SEMANTICS_MANIFEST)
   override FLOCQ = -R $(SEMANTICS_DIR)/Flocq Flocq
 else ifeq ($(COMPCERT),platform)
   # Platform supplied CompCert
@@ -896,6 +898,7 @@ VST.config:
 	echo "VST_COMPCERT=$(COMPCERT)"; \
 	echo "VST_COMPCERT_INST_DIR=$(COMPCERT_INST_DIR)"; \
 	echo "VST_SEMANTICS_DIR=$(SEMANTICS_DIR)"; \
+	echo "VST_SEMANTICS_MANIFEST=$(SEMANTICS_MANIFEST)"; \
 	echo "VST_COMPCERT_EXPLICIT_PATH=$(COMPCERT_EXPLICIT_PATH)"; \
 	echo "VST_INSTALLDIR=$(INSTALLDIR)"; \
 	) > VST.config

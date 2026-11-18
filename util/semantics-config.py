@@ -9,7 +9,8 @@ try:
     root = Path(sys.argv[1])
     if not re.fullmatch(r"[A-Za-z0-9_./-]+", str(root)):
         raise ValueError("component path must be usable in Make load-path flags")
-    record = json.loads((root / "semantics.json").read_text())
+    manifest = Path(sys.argv[2]) if len(sys.argv) == 3 else root / "semantics.json"
+    record = json.loads(manifest.read_text())
     if (record["schema"], record["kind"]) != ("clightforge.identity.v1", "semantics"):
         raise ValueError("expected a semantics component")
     content = record["content"]

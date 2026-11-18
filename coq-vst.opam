@@ -10,24 +10,26 @@ bug-reports: "https://github.com/lihaokun/VST/issues"
 dev-repo: "git+https://github.com/lihaokun/VST.git"
 depends: [
   "ocaml" {= "4.14.2"}
-  "coq" {= "9.0.0"}
   "coq-core" {= "9.0.0"}
-  "coq-stdlib" {= "9.0.0"}
+  "rocq-stdlib" {= "9.0.0"}
   "conf-python-3"
-  "coq-vst-zlist" {= "2.13"}
+  "clightforge" {= "0.1.0+pkg3"}
+]
+conflicts: ["coq-vst-zlist" "coq-compcert" "coq-flocq"]
+build-env: [
+  [SEMANTICS_DIR = "%{lib}%/coq/user-contrib"]
+  [SEMANTICS_MANIFEST = "%{share}%/clightforge/semantics.json"]
 ]
 build: [
-  [make "-j%{jobs}%" "vst" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
+  [make "-j%{jobs}%" "vst" "progs64" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=bundled" "BITSIZE=64"]
 ]
 install: [
-  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
+  [make "install" "INSTALLDIR=%{lib}%/coq/user-contrib/VST" "COQBIN=%{bin}%/" "COMPCERT=semantics" "ZLIST=bundled" "BITSIZE=64"]
 ]
 run-test: [
-  [make "-j%{jobs}%" "test-fusion" "COMPCERT=semantics" "ZLIST=platform" "BITSIZE=64"]
+  [make "-j%{jobs}%" "test-fusion" "COMPCERT=semantics" "ZLIST=bundled" "BITSIZE=64"]
 ]
 description: """
-This fork consumes a separately exported ClightForge semantics component.
-Export SEMANTICS_DIR=/absolute/component before invoking opam (including install).
-The component supplies both compcert and Flocq; it is not an official CompCert
-package. See BUILD_ORGANIZATION.md for export and verification commands.
+This fork consumes the switch-installed ClightForge libraries and manifest.
+The package builds its own zlist and needs no external semantics export.
 """
