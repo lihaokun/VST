@@ -107,3 +107,4 @@ fusion/.build/
 fusion/.candidate/
 /ccv-dependency.json
 /.build/
+/assumptions.txt

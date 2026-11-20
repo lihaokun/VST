@@ -4,6 +4,13 @@ set -euo pipefail
 root=$(realpath "$(dirname "$0")/..")
 prefix=${OPAM_SWITCH_PREFIX:?Use opam exec --switch=...}
 vst=$(realpath "${1:-$prefix/lib/coq/user-contrib/VST}")
+semantics=${SEMANTICS_DIR:-$(awk -F= '$1 == "VST_SEMANTICS_DIR" {print $2}' "$vst/VST.config")}
+base_args=()
+if [ -n "$semantics" ]; then
+  test -f "$semantics/compcert/cfrontend/Clight.vo"
+  test -f "$semantics/Flocq/Core/Core.vo"
+  base_args=(-R "$semantics/compcert" compcert -R "$semantics/Flocq" Flocq)
+fi
 for module in FusionExact FusionExactSem FusionMemvals FusionViews64 FusionStore SeparationLogicAsLogicSoundness; do
   test -f "$vst/floyd/$module.vo" || { printf 'Missing installed module: %s\n' "$module" >&2; exit 1; }
 done
@@ -15,7 +22,7 @@ trap 'rm -rf "$work"' EXIT
 cp "$root"/progs64/fusion/*.v "$work/"
 (
   cd "$work"
-  args=(-Q "$vst" VST -Q . VST.progs64.fusion)
+  args=(-Q "$vst" VST -Q . VST.progs64.fusion "${base_args[@]}")
   # 文件存在不等于实际 import 到该文件；核指定库根的解析位置。
   for module in FusionExact FusionExactSem FusionMemvals FusionViews64 FusionStore SeparationLogicAsLogicSoundness; do
     printf 'Locate Library VST.floyd.%s.\n' "$module" |

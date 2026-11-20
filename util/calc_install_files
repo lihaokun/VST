@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 #  The $1 argument of this script should be the desired make target
 
+set -euo pipefail
 MAKE=${MAKE:-make}
-${MAKE} depend >& /dev/null
-${MAKE} CLIGHTGEN="CLIGHTGEN" -Bn veric floyd $1 2>/dev/null | \
- awk '/^echo COQC /{print $NF}/^CLIGHTGEN/{print $NF}'
+${MAKE} .depend > /dev/null
+# Use the existing Make dependency closure. C translations are checked in;
+# installation neither regenerates them nor probes a clightgen executable.
+# The selected semantics export uses absolute paths and is not installed with VST.
+${MAKE} -Bn -o .depend -o _CoqProject -o _CoqProject-export veric floyd $1 | \
+ awk '/^echo COQC / && $NF !~ /^\// {print $NF}'

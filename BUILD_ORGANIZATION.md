@@ -1,5 +1,63 @@
 # HOW TO BUILD:
 
+## This fork: ClightForge semantics (default)
+
+The `build/clightforge-semantics` adaptation starts at Fusion dev `5639fbc4`.
+The minimal change is a `COMPCERT=semantics` mode in the existing Makefile:
+read the export's `semantics.json`, map its `compcert` and `Flocq` roots,
+and retain the existing VST targets and installation dependency closure.
+No mathematical definitions or proofs are changed. The older build modes
+below are explicit legacy options, not prerequisites for this mode.
+
+Supply the component outside opam; no official CompCert package or binary is
+required. With a clean ClightForge `63b9314` checkout, export to a **new**,
+persistent directory (the producer refuses to overwrite an existing export):
+
+```sh
+opam exec --switch=rocq90 -- make PROFILE=x86_64-linux -j2 semantics-export \
+  EXPORT_DIR=/absolute/component
+# In the ClightForge checkout; use an independently saved trusted manifest:
+python3 -B build/components/identity.py verify-semantics \
+  --root /absolute/component --expect /absolute/trusted-semantics.json
+```
+
+The component README documents provenance and rebuilding. VST's small config
+reader checks the supported x86_64-linux / 3.17 layout and file availability;
+it does not replace the producer's content verification. Parameter values in
+the manifest are implementation configuration, not new Rocq equations.
+
+In VST, using a clean build tree (do not reuse `.vo` from another base):
+
+```sh
+export SEMANTICS_DIR=/absolute/component
+opam exec --switch=rocq90 -- make -j2 vst progs64
+opam exec --switch=rocq90 -- make install INSTALLDIR=/absolute/install/VST
+opam exec --switch=rocq90 -- make assumptions.txt
+```
+
+`ZLIST=bundled` is the manual default; opam uses `ZLIST=platform` from
+`coq-vst-zlist`. For opam, export `SEMANTICS_DIR` before both build and install
+and make that directory accessible inside the opam sandbox. Python 3 reads
+the producer's JSON. Flocq always comes from this component, even if another
+Flocq is installed. `util/coqflags` and `_CoqProject-export` expose the selected
+mappings. Installed consumers must explicitly use:
+
+```text
+-Q /absolute/install/VST VST
+-R /absolute/component/compcert compcert
+-R /absolute/component/Flocq Flocq
+```
+
+The export and installation paths must remain available. Changing component
+requires a clean VST rebuild and regeneration of project flags. Checked-in
+example translations are used for the default build/install; C regeneration
+is a separate explicit operation. Soundness, VSU, Fusion and `simpleconc`
+(including `concurrency/ghosts`) remain in the build/install closure.
+The concrete component, commands and acceptance results are recorded in
+[doc/clightforge-build.md](doc/clightforge-build.md).
+
+## Historical upstream installation options
+
 ## Check compatibility
 
 If you install VST via opam, opam will take care of dependency versions.

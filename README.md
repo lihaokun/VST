@@ -1,5 +1,14 @@
 ![Verified Software Toolchain](chain.jpg)
 
+## ClightForge semantics build
+
+This fork consumes a separately exported ClightForge semantics component,
+including its Flocq libraries. Set `SEMANTICS_DIR` to the persistent export
+root before Make or opam builds. The default build/install requires no full
+official CompCert package, `clightgen`, or `ccomp`.
+See [the build instructions](BUILD_ORGANIZATION.md#this-fork-clightforge-semantics-default).
+Soundness, VSU, Fusion and the existing concurrency dependency closure are retained.
+
 ## Fusion: exact stores and overlapping integer views
 
 This branch extends **VST 2.16** to verify code that writes a wide integer and
@@ -29,9 +38,10 @@ The extensions currently provide:
 **Start with [the Fusion API and build guide](doc/fusion.md)**: module structure
 (§2), theorem signatures and prerequisites (§3–4), proof composition and the
 representation distinction (§5), installation/update (§6), and tests (§7).
-The maintained branch is **`fusion/vst-2.16`**, with one complete public interface.
+Fusion originated on **`fusion/vst-2.16`**, with one complete public interface.
 The currently validated environment is x86-64 little-endian, Rocq 9.0.0 and
-CompCert 3.17.
+CompCert 3.17 semantics supplied by ClightForge. See the
+[component build acceptance record](doc/clightforge-build.md).
 
 ## Upstream VST
 
@@ -52,8 +62,9 @@ The [LICENSE](LICENSE) file has information about copyright, licensing, and perm
 
 ## How to install:
 
-For this Fusion branch, follow [the standard opam instructions in the Fusion guide](doc/fusion.md).
-For general VST build options, see [BUILD_ORGANIZATION.md](BUILD_ORGANIZATION.md).
+For this fork, follow [BUILD_ORGANIZATION.md](BUILD_ORGANIZATION.md).
+The [Fusion guide](doc/fusion.md) describes the proof API and its original
+official-CompCert environment; use the component build instructions above here.
 
 ## Documentation:
 
